@@ -30,7 +30,7 @@
 
       --r:18px;
       --r2:14px;
-      --h:42px;
+      --h:46px;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       --focus: 0 0 0 3px rgba(203,40,17,.20);
     }
@@ -110,8 +110,8 @@
     }
 
     .titleBox{ display:flex; flex-direction:column; gap:6px; }
-    h1{ margin:0; font-size:20px; font-weight:900; letter-spacing:.2px; }
-    .sub{ margin:0; color:var(--muted); font-size:12.6px; line-height:1.35; max-width:92ch; }
+    h1{ margin:0; font-size:24px; font-weight:900; letter-spacing:.2px; }
+    .sub{ margin:0; color:var(--muted); font-size:14px; line-height:1.35; max-width:92ch; }
 
     .controls{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:8px; }
     .pill{
@@ -156,8 +156,7 @@
     }
 
     .kpis{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
-    .kpi{
-      min-width:185px;
+    .kpi{ min-width:200px;
       border:1px solid rgba(15,23,42,.10);
       border-radius:999px;
       background: linear-gradient(180deg, rgba(255,255,255,.94), rgba(255,255,255,.84));
@@ -165,8 +164,8 @@
       padding:10px 14px;
       display:flex; flex-direction:column; gap:3px;
     }
-    .kpi .lbl{ font-size:11.3px; color:var(--muted); font-weight:900; }
-    .kpi .val{ font-family:var(--mono); font-size:14px; font-weight:950; }
+    .kpi .lbl{ font-size:12.6px; color:var(--muted); font-weight:900; }
+    .kpi .val{ font-family:var(--mono); font-size:16px; font-weight:950; }
     .pos{ color:var(--pos); }
     .neg{ color:var(--neg); }
 
@@ -198,9 +197,8 @@
     @media (max-width: 560px){ form{ grid-template-columns: 1fr 1fr; } .span2{ grid-column:span 2; } }
 
     .field{ display:flex; flex-direction:column; gap:6px; min-width:0; }
-    .field label{ font-size:11.3px; color:var(--muted); font-weight:900; }
-    input,select{
-      height:var(--h);
+    .field label{ font-size:12.8px; color:var(--muted); font-weight:900; }
+    input,select{ height:46px;
       border-radius:var(--r2);
       border:1px solid rgba(15,23,42,.14);
       background: linear-gradient(180deg, rgba(255,255,255,.94), rgba(255,255,255,.84));
@@ -213,8 +211,7 @@
     input[type="number"]{ font-family:var(--mono); }
     input:focus,select:focus{ border-color: rgba(203,40,17,.45); box-shadow: var(--focus), var(--inset); }
 
-    .btn{
-      height:var(--h);
+    .btn{ height:46px;
       padding:0 14px;
       border-radius:var(--r2);
       border:1px solid rgba(15,23,42,.12);
@@ -241,10 +238,7 @@
 
     .tableWrap{ overflow:auto; border-top:1px solid var(--line); }
     table{ width:100%; border-collapse:separate; border-spacing:0; min-width:980px; }
-    thead th{
-      position:sticky; top:0; z-index:5;
-      text-align:left;
-      font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+    thead th{ position:sticky; top:0; z-index:5; text-align:left; font-size:12px; letter-spacing:.12em; text-transform:uppercase;
       color:var(--muted);
       background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.90));
       border-bottom:1px solid var(--line);
@@ -252,6 +246,7 @@
       white-space:nowrap;
     }
     tbody td{
+      font-size:14px;
       padding:10px 12px;
       border-bottom:1px solid rgba(15,23,42,.08);
       background: rgba(255,255,255,.74);
@@ -264,8 +259,7 @@
     td.rent.pos{ color:var(--pos); font-weight:950; }
     td.rent.neg{ color:var(--neg); font-weight:950; }
 
-    .cellInput,.cellSelect{
-      width:100%; height:36px;
+    .cellInput,.cellSelect{ width:100%; height:44px;
       border-radius:12px;
       border:1px solid rgba(15,23,42,.12);
       background: rgba(255,255,255,.86);
@@ -273,7 +267,7 @@
       box-shadow: var(--inset);
       outline:none;
       transition: box-shadow .15s ease, border-color .15s ease;
-      font-size:13px;
+      font-size:14.5px;
     }
     .cellInput.num{ text-align:right; font-family:var(--mono); }
     .cellInput:focus,.cellSelect:focus{ border-color: rgba(203,40,17,.45); box-shadow: var(--focus), var(--inset); }
@@ -400,6 +394,7 @@
         box-shadow: var(--shadow2);
       }
       tbody td{
+      font-size:14px;
         border-bottom:1px solid rgba(15,23,42,.08);
         background: rgba(255,255,255,.86);
         padding:10px 12px 12px;
@@ -432,9 +427,13 @@
     <header role="banner" aria-label="Encabezado">
       <div class="brandBar" aria-hidden="true"></div>
       <div class="brand">
-             <img class="logo" src="./ChatGPT Image 14 ene 2026, 04_12_24 p.m..png" alt="Logo" />
+        <!-- OPCIONAL: pon tu logo acá
+             <img class="logo" src="logo.jpg" alt="Logo" />
+          -->
+          <div class="logoSlot" aria-label="Logo (coloca tu JPG)">LOGO</div>
         <div class="titleBox">
           <h1>Calculador de Rentabilidad</h1>
+          <p class="sub">Estilo basado en el logo. Todo se filtra por mes. Operaciones y Gastos se guardan en localStorage.</p>
 
           <div class="controls" aria-label="Controles">
             <div class="pill" aria-label="Selector de mes">
@@ -453,7 +452,7 @@
 
       <div class="kpis" aria-label="KPIs del mes">
         <div class="kpi">
-          <div class="lbl">Rentabilidad Bruta (Mes)</div>
+          <div class="lbl">Facturación Bruta (Mes)</div>
           <div id="kpiRentBruta" class="val pos">ARS 0</div>
         </div>
         <div class="kpi">
@@ -495,6 +494,7 @@
                 <option value="OBLEAS">OBLEAS</option>
                 <option value="VAO">VAO</option>
                 <option value="PH">PH</option>
+                <option value="SERVICE">SERVICE</option>
                 <option value="OTRO">OTRO</option>
               </select>
             </div>
@@ -533,7 +533,10 @@
             <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
               <label class="sr-only" for="searchOps">Buscar</label>
               <input id="searchOps" type="text" placeholder="Buscar" aria-label="Buscar en operaciones" style="height:var(--h);min-width:280px;" />
+              <label class="sr-only" for="dayOps">Filtrar por día</label>
+              <input id="dayOps" type="date" aria-label="Filtrar operaciones por día" style="height:46px;min-width:170px;" />
               <button id="btnClearOps" class="btn ghost" type="button" aria-label="Limpiar búsqueda">Limpiar</button>
+              <button id="btnClearDayOps" class="btn ghost" type="button" aria-label="Limpiar filtro por día">Día</button>
             </div>
           </div>
 
@@ -619,7 +622,10 @@
             <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
               <label class="sr-only" for="searchGastos">Buscar</label>
               <input id="searchGastos" type="text" placeholder="Buscar" aria-label="Buscar en gastos" style="height:var(--h);min-width:280px;" />
+              <label class="sr-only" for="dayGastos">Filtrar por día</label>
+              <input id="dayGastos" type="date" aria-label="Filtrar gastos por día" style="height:46px;min-width:170px;" />
               <button id="btnClearGastos" class="btn ghost" type="button" aria-label="Limpiar búsqueda">Limpiar</button>
+              <button id="btnClearDayGastos" class="btn ghost" type="button" aria-label="Limpiar filtro por día">Día</button>
             </div>
           </div>
 
@@ -781,7 +787,7 @@
     // Cambiá si querés otro "espacio" (otra empresa / otra instancia)
     const EMPRESA_ID = "quirgroup";
 
-    const SERVICE_OPTIONS = ["CONVERSION","OBLEAS","VAO","PH","OTRO"];
+    const SERVICE_OPTIONS = ["CONVERSION","OBLEAS","VAO","PH","SERVICE","OTRO"];
     const GASTO_CATS = ["SUELDOS","GENERAL","SERVICIOS","IMPUESTOS","COMBUSTIBLE","OTRO"];
 
     const $ = (s) => document.querySelector(s);
@@ -811,6 +817,8 @@
       inCosto: $("#inCosto"),
       searchOps: $("#searchOps"),
       btnClearOps: $("#btnClearOps"),
+      dayOps: $("#dayOps"),
+      btnClearDayOps: $("#btnClearDayOps"),
       tbodyOps: $("#tbodyOps"),
       tVentaOps: $("#tVentaOps"),
       tCostoOps: $("#tCostoOps"),
@@ -823,6 +831,8 @@
       gMonto: $("#gMonto"),
       searchGastos: $("#searchGastos"),
       btnClearGastos: $("#btnClearGastos"),
+      dayGastos: $("#dayGastos"),
+      btnClearDayGastos: $("#btnClearDayGastos"),
       tbodyGastos: $("#tbodyGastos"),
       tGastos: $("#tGastos"),
 
@@ -992,14 +1002,14 @@
 
       const neta = tOps.rent - tG;
 
-      els.kpiRentBruta.textContent = fmtARS(tOps.rent);
+      els.kpiRentBruta.textContent = fmtARS(tOps.venta);
       els.kpiGastos.textContent = fmtARS(tG);
       if (els.kpiVAO) els.kpiVAO.textContent = fmtARS(vaoTotal);
       els.kpiNeta.textContent = fmtARS(neta);
 
-      els.kpiRentBruta.classList.toggle("pos", tOps.rent >= 0);
-      els.kpiRentBruta.classList.toggle("neg", tOps.rent < 0);
-      els.kpiNeta.classList.toggle("pos", neta >= 0);
+      els.kpiRentBruta.classList.toggle("pos", tOps.venta >= 0);
+      els.kpiRentBruta.classList.toggle("neg", tOps.venta < 0);
+els.kpiNeta.classList.toggle("pos", neta >= 0);
       els.kpiNeta.classList.toggle("neg", neta < 0);
     };
 
@@ -1157,6 +1167,8 @@
 
     // -------- Eventos UI --------
     els.monthPick.addEventListener("change", () => {
+      if (els.dayOps) els.dayOps.value = "";
+      if (els.dayGastos) els.dayGastos.value = "";
       state.month = clampText(els.monthPick.value) || currentMonth();
       els.footHint.textContent = `Exporta CSV del mes ${state.month} (pestaña actual).`;
 
@@ -1252,8 +1264,15 @@
     els.btnClearOps.addEventListener("click", () => { els.searchOps.value = ""; renderOps(); });
     els.searchOps.addEventListener("input", () => renderOps());
 
+    // Filtro por día
+    els.dayOps.addEventListener("change", () => renderOps());
+    els.btnClearDayOps.addEventListener("click", () => { els.dayOps.value = ""; renderOps(); });
+
     els.btnClearGastos.addEventListener("click", () => { els.searchGastos.value = ""; renderGastos(); });
     els.searchGastos.addEventListener("input", () => renderGastos());
+
+    els.dayGastos.addEventListener("change", () => renderGastos());
+    els.btnClearDayGastos.addEventListener("click", () => { els.dayGastos.value = ""; renderGastos(); });
 
     // Edit/Delete ops (delegation)
     els.tbodyOps.addEventListener("click", async (e) => {
