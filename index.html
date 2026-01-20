@@ -427,10 +427,8 @@
     <header role="banner" aria-label="Encabezado">
       <div class="brandBar" aria-hidden="true"></div>
       <div class="brand">
-             <img class="logo" src="./ChatGPT Image 14 ene 2026, 04_12_24 p.m..png" alt="Logo" />
         <div class="titleBox">
-          <h1>Calculador de Rentabilidad</h1>
-
+          <h1>Calculador de Rentabilidad QUIRGROUP ALEM 642</h1>
           <div class="controls" aria-label="Controles">
             <div class="pill" aria-label="Selector de mes">
               <label for="monthPick">Mes</label>
@@ -456,7 +454,7 @@
           <div id="kpiGastos" class="val">ARS 0</div>
         </div>
         <div class="kpi">
-          <div class="lbl">VAO (Mes)</div>
+          <div class="lbl">Rentabilidad VAO (Mes)</div>
           <div id="kpiVAO" class="val">ARS 0</div>
         </div>
         <div class="kpi">
@@ -997,10 +995,10 @@
       const tOps = totalsOps(state.ops);
       const tG = totalGastos(state.gastos);
 
-      // VAO total del mes
+      // VAO (Mes): RENTABILIDAD total de VAO = SUMA(Venta - Costo) donde servicio == VAO
       const vaoTotal = state.ops
         .filter(r => r.servicio === "VAO")
-        .reduce((acc, r) => acc + toNumber(r.venta), 0);
+        .reduce((acc, r) => acc + (toNumber(r.venta) - toNumber(r.costo)), 0);
 
       const neta = tOps.rent - tG;
 
