@@ -427,13 +427,9 @@
     <header role="banner" aria-label="Encabezado">
       <div class="brandBar" aria-hidden="true"></div>
       <div class="brand">
-        <!-- OPCIONAL: pon tu logo acá
-             <img class="logo" src="logo.jpg" alt="Logo" />
-          -->
-          <div class="logoSlot" aria-label="Logo (coloca tu JPG)">LOGO</div>
+             <img class="logo" src="./ChatGPT Image 14 ene 2026, 04_12_24 p.m..png" alt="Logo" />
         <div class="titleBox">
           <h1>Calculador de Rentabilidad</h1>
-          <p class="sub">Estilo basado en el logo. Todo se filtra por mes. Operaciones y Gastos se guardan en localStorage.</p>
 
           <div class="controls" aria-label="Controles">
             <div class="pill" aria-label="Selector de mes">
@@ -975,13 +971,19 @@
 
     const getFilteredOps = () => {
       const q = clampText(els.searchOps.value).toLowerCase();
-      if (!q) return state.ops;
-      return state.ops.filter(r => (`${r.fecha} ${r.servicio} ${r.dominio} ${r.desc}`).toLowerCase().includes(q));
+      const day = clampText(els.dayOps?.value);
+      let base = state.ops;
+      if (day) base = base.filter(r => r.fecha === day);
+      if (!q) return base;
+      return base.filter(r => (`${r.fecha} ${r.servicio} ${r.dominio} ${r.desc}`).toLowerCase().includes(q));
     };
     const getFilteredGastos = () => {
       const q = clampText(els.searchGastos.value).toLowerCase();
-      if (!q) return state.gastos;
-      return state.gastos.filter(g => (`${g.fecha} ${g.categoria} ${g.desc}`).toLowerCase().includes(q));
+      const day = clampText(els.dayGastos?.value);
+      let base = state.gastos;
+      if (day) base = base.filter(g => g.fecha === day);
+      if (!q) return base;
+      return base.filter(g => (`${g.fecha} ${g.categoria} ${g.desc}`).toLowerCase().includes(q));
     };
 
     // Render throttling (evita repaints masivos)
@@ -1266,12 +1268,14 @@ els.kpiNeta.classList.toggle("pos", neta >= 0);
 
     // Filtro por día
     els.dayOps.addEventListener("change", () => renderOps());
+    els.dayOps.addEventListener("input", () => renderOps());
     els.btnClearDayOps.addEventListener("click", () => { els.dayOps.value = ""; renderOps(); });
 
     els.btnClearGastos.addEventListener("click", () => { els.searchGastos.value = ""; renderGastos(); });
     els.searchGastos.addEventListener("input", () => renderGastos());
 
     els.dayGastos.addEventListener("change", () => renderGastos());
+    els.dayGastos.addEventListener("input", () => renderGastos());
     els.btnClearDayGastos.addEventListener("click", () => { els.dayGastos.value = ""; renderGastos(); });
 
     // Edit/Delete ops (delegation)
@@ -1291,6 +1295,14 @@ els.kpiNeta.classList.toggle("pos", neta >= 0);
     });
 
     els.tbodyOps.addEventListener("input", (e) => {
+      handleOpsEditEvent(e);
+    });
+
+    els.tbodyOps.addEventListener("change", (e) => {
+      handleOpsEditEvent(e);
+    });
+
+    function handleOpsEditEvent(e){
       const el = e.target;
       const tr = el.closest("tr");
       if (!tr) return;
@@ -1310,7 +1322,8 @@ els.kpiNeta.classList.toggle("pos", neta >= 0);
       // Debounce por fila/campo (evita update por cada tecla)
       scheduleUpdateOp(id, field, val);
       scheduleRender();
-    });
+    }
+
 
     // Edit/Delete gastos
     els.tbodyGastos.addEventListener("click", async (e) => {
@@ -1329,6 +1342,14 @@ els.kpiNeta.classList.toggle("pos", neta >= 0);
     });
 
     els.tbodyGastos.addEventListener("input", (e) => {
+      handleGastosEditEvent(e);
+    });
+
+    els.tbodyGastos.addEventListener("change", (e) => {
+      handleGastosEditEvent(e);
+    });
+
+    function handleGastosEditEvent(e){
       const el = e.target;
       const tr = el.closest("tr");
       if (!tr) return;
@@ -1342,7 +1363,8 @@ els.kpiNeta.classList.toggle("pos", neta >= 0);
 
       scheduleUpdateGasto(id, field, val);
       scheduleRender();
-    });
+    }
+
 
     // Tabs
     els.tabOpsBtn.addEventListener("click", () => setTab("ops"));
