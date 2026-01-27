@@ -764,9 +764,19 @@
 
                         <div class="stat" aria-label="Tubos de PH del mes">
               <div class="t">Tubos PH</div>
-              <div id="cntTubosPH" class="v">0</div>
+<div id="cntTubosPH" class="v">0</div>
               <div class="d">Suma de tubos cargados en operaciones PH (mes).</div>
             </div>
+
+
+            <div class="stat" aria-label="Obleas del mes (OBLEAS + PH + CONVERSION)">
+              <div class="t">OBLEAS</div>
+              <div id="cntOBLEAS" class="v">0</div>
+              <div class="d">OBLEAS + 1 por cada PH + 1 por cada CONVERSION (mes).</div>
+            </div>
+
+              
+
 
 
             <div class="stat" aria-label="Operaciones VAO del mes">
@@ -792,12 +802,8 @@
               <div id="cntOTRO" class="v">0</div>
               <div class="d">Cantidad de operaciones OTRO (mes).</div>
             </div>
+          </div>
 
-<div class="stat" aria-label="Servicios con más carga">
-              <div class="t">Top del mes</div>
-              <div id="cntTop" class="v">—</div>
-              <div id="cntTopHint" class="d">—</div>
-            </div>
           </div>
 
           <div class="tableWrap" role="region" aria-label="Tabla de conteo por servicio" tabindex="0" style="display:none">
@@ -992,8 +998,7 @@
 
       cntTotalOps: $("#cntTotalOps"),
       cntTubosPH: $("#cntTubosPH"),
-      cntTop: $("#cntTop"),
-      cntTopHint: $("#cntTopHint"),
+      cntOBLEAS: $("#cntOBLEAS"),
       cntVAO: $("#cntVAO"),
       cntCONVERSION: $("#cntCONVERSION"),
       cntSERVICE: $("#cntSERVICE"),
@@ -1279,12 +1284,27 @@ els.kpiNeta.classList.toggle("pos", neta >= 0);
 
     // Conteo de operaciones por servicio (mes actual)
     const renderConteo = () => {
-      if (!els.tbodyConteo || !els.cntTotalOps) return;
+      if (!els.cntTotalOps) return;
 
+      // Conteo base por tipo de servicio (operaciones)
       const countsOps = Object.fromEntries(SERVICE_OPTIONS.map(s => [s, 0]));
-      for (const r of state.ops) countsOps[r.servicio] = (countsOps[r.servicio] || 0) + 1;
+      for (const r of state.ops) {
+        const s = r.servicio || "OTRO";
+        countsOps[s] = (countsOps[s] || 0) + 1;
+      }
 
       const totalOps = state.ops.length;
+
+      // KPI Tubos PH (suma de tubos en operaciones PH)
+      const tubosPH = state.ops
+        .filter(r => r.servicio === "PH")
+        .reduce((acc, r) => acc + clampTubos(r.tubos || 1), 0);
+
+      if (els.cntTubosPH) els.cntTubosPH.textContent = String(tubosPH);
+
+      // KPI OBLEAS (OBLEAS + 1 por cada PH + 1 por cada CONVERSION)
+      const obleasKPI = (countsOps["OBLEAS"] || 0) + (countsOps["PH"] || 0) + (countsOps["CONVERSION"] || 0);
+      if (els.cntOBLEAS) els.cntOBLEAS.textContent = String(obleasKPI);
 
       // KPIs por servicio (operaciones)
       if (els.cntVAO) els.cntVAO.textContent = String(countsOps["VAO"] || 0);
@@ -1292,38 +1312,23 @@ els.kpiNeta.classList.toggle("pos", neta >= 0);
       if (els.cntSERVICE) els.cntSERVICE.textContent = String(countsOps["SERVICE"] || 0);
       if (els.cntOTRO) els.cntOTRO.textContent = String(countsOps["OTRO"] || 0);
 
-      const tubosPH = state.ops
-        .filter(r => r.servicio === "PH")
-        .reduce((acc, r) => acc + clampTubos(r.tubos || 1), 0);
-
-      if (els.cntTubosPH) els.cntTubosPH.textContent = String(tubosPH);
+      // Totales
       els.cntTotalOps.textContent = String(totalOps);
       if (els.tConteo) els.tConteo.textContent = String(totalOps);
 
-      const ordered = SERVICE_OPTIONS
-        .map(s => ({ s, n: countsOps[s] || 0 }))
-        .sort((a, b) => b.n - a.n || a.s.localeCompare(b.s));
-      const top = ordered[0];
+      // Tabla (está oculta, pero se mantiene consistente)
+      if (els.tbodyConteo) {
+        const rows = SERVICE_OPTIONS
+          .map(s => ({ s, n: countsOps[s] || 0 }))
+          .sort((a, b) => b.n - a.n || a.s.localeCompare(b.s));
 
-      if (els.cntTop) els.cntTop.textContent = top && top.n > 0 ? `${top.s}` : "—";
-      if (els.cntTopHint) {
-        if (!top || top.n <= 0) els.cntTopHint.textContent = "Sin cargas en este mes.";
-        else {
-          const pct = totalOps > 0 ? ((top.n / totalOps) * 100) : 0;
-          els.cntTopHint.textContent = `${top.n} operaciones · ${pct.toFixed(1)}% del total`;
-        }
+        els.tbodyConteo.innerHTML = rows.map(r => `
+          <tr>
+            <td data-label="Servicio"><strong>${escapeAttr(r.s)}</strong></td>
+            <td data-label="Cantidad" class="num">${r.n}</td>
+          </tr>
+        `).join("");
       }
-
-      const rows = SERVICE_OPTIONS
-        .map(s => ({ s, n: countsOps[s] || 0 }))
-        .sort((a, b) => b.n - a.n || a.s.localeCompare(b.s));
-
-      els.tbodyConteo.innerHTML = rows.map(r => `
-        <tr>
-          <td data-label="Servicio"><strong>${escapeAttr(r.s)}</strong></td>
-          <td data-label="Cantidad" class="num">${r.n}</td>
-        </tr>
-      `).join("");
     };
 
     // renderAll(persistUIOnly=true/false)
