@@ -1,1834 +1,2025 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>CRPC Quiroga – Retiro de cilindros</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Calculador de Rentabilidad · Quirgroup</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --rojo:#d50000;
-      --rojo-osc:#a80000;
-      --amarillo:#ffd600;
-      --fondo:#f4f4f4;
-      --card:#ffffff;
-      --borde:#dddddd;
-      --texto:#111111;
-      --texto-suave:#555555;
+      /* Paleta Quirgroup (extraída del logo) */
+      --qy:#FED933;          /* amarillo */
+      --qr:#CB2811;          /* rojo */
+      --qd:#331D17;          /* marrón/negro del texto */
+      --qk:#0b0f14;          /* negro frío */
+      --bg:#F6F7FB;          /* fondo app */
+      --card:rgba(255,255,255,.88);
+      --line:rgba(15,23,42,.10);
+      --muted:#5b677a;
+
+      --pos:#0f766e;
+      --neg:#b91c1c;
+
+      --shadow: 0 12px 32px rgba(15,23,42,.10);
+      --shadow2: 0 2px 10px rgba(15,23,42,.08);
+      --inset: inset 0 1px 0 rgba(255,255,255,.75);
+
+      --r:18px;
+      --r2:14px;
+      --h:46px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --focus: 0 0 0 3px rgba(203,40,17,.20);
     }
 
-    *{
-      box-sizing:border-box;
-      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-    }
-
+    *{ box-sizing:border-box; }
     body{
       margin:0;
-      padding:10px;
-      background:var(--fondo);
-      color:var(--texto);
-      font-size:16px;
+      font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      color:#0f172a;
+      background:
+        radial-gradient(1100px 600px at 12% 0%, rgba(254,217,51,.28), transparent 60%),
+        radial-gradient(900px 500px at 92% 8%, rgba(203,40,17,.14), transparent 55%),
+        var(--bg);
     }
 
-    body.orden-open{ overflow:hidden; }
+    .wrap{ max-width:1240px; margin:0 auto; padding:18px 16px 26px; }
 
-    .page{ max-width:1100px; margin:0 auto; }
-
-    /* SPLASH / LOGO */
-    .splash-overlay{
-      position:fixed;
-      inset:0;
-      background:var(--rojo);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      z-index:9000;
-      animation:splashFade 2.7s ease-in-out forwards;
-    }
-    .splash-logo-wrapper{ text-align:center; color:#ffffff; }
-    .splash-logo-circle{
-      width:96px;height:96px;border-radius:50%;
-      border:4px solid var(--amarillo);
-      display:flex;align-items:center;justify-content:center;
-      font-size:56px;font-weight:900;color:var(--amarillo);
-      box-shadow:0 6px 18px rgba(0,0,0,0.4);
-      margin:0 auto 12px;
-      background:rgba(0,0,0,0.15);
-      animation:splashLogo 2.7s ease-in-out forwards;
-    }
-    .splash-text-main{ font-size:1.4rem;font-weight:800;letter-spacing:1px; }
-    .splash-text-sub{ font-size:0.95rem;margin-top:3px;opacity:0.9; }
-
-    @keyframes splashFade{
-      0%{opacity:0;} 10%{opacity:1;} 70%{opacity:1;} 100%{opacity:0;}
-    }
-    @keyframes splashLogo{
-      0%{transform:scale(0.7);opacity:0;}
-      20%{transform:scale(1.05);opacity:1;}
-      60%{transform:scale(1);opacity:1;}
-      100%{transform:scale(0.9);opacity:0;}
+    header{
+      border:1px solid var(--line);
+      border-radius:var(--r);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.80));
+      box-shadow:var(--shadow);
+      backdrop-filter: blur(10px);
+      padding:16px 16px 14px;
+      display:flex; gap:14px; align-items:flex-end; justify-content:space-between;
+      flex-wrap:wrap;
     }
 
-    /* CABECERA */
-    .header{
-      background:var(--card);
-      border-radius:8px;
-      padding:10px 12px;
-      border:1px solid var(--borde);
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:10px;
+    .brandBar{
+      width:100%;
+      height:10px;
+      border-radius: 14px;
+      background: linear-gradient(90deg, var(--qy) 0%, var(--qy) 58%, var(--qr) 58%, var(--qr) 100%);
+      box-shadow: var(--shadow2);
+      border:1px solid rgba(15,23,42,.08);
+      margin-bottom: 10px;
     }
-    .header-left{ display:flex;align-items:center;gap:10px; }
+
+    .brand{
+      display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+      min-width:280px;
+    }
     .logo{
-      width:44px;height:44px;border-radius:50%;
-      background:var(--rojo);
-      color:var(--amarillo);
-      display:flex;align-items:center;justify-content:center;
-      font-weight:900;font-size:26px;
-      box-shadow:0 3px 8px rgba(0,0,0,0.25);
+      width:220px; height:auto;
+      border-radius:14px;
+      box-shadow: var(--shadow2);
+      border:1px solid rgba(15,23,42,.10);
+      overflow:hidden;
+      background: #fff;
+      display:block;
     }
-    .header-title{
-      margin:0;font-size:1.3rem;font-weight:800;color:var(--rojo);
-    }
-    .header-sub{ margin:2px 0 0;font-size:0.9rem;color:var(--texto-suave); }
-    .header-right{ display:flex;flex-direction:column;align-items:flex-end;gap:6px; }
-    .chip{
-      background:#ffe8e8;color:var(--rojo-osc);
-      padding:3px 8px;border-radius:999px;
-      font-size:0.8rem;font-weight:600;
-    }
-    .btn-reset{
-      background:#ffffff;color:var(--rojo);
-      border:2px solid var(--rojo);
-      border-radius:999px;
-      padding:5px 12px;
-      font-size:0.9rem;font-weight:700;
-      cursor:pointer;
-    }
-    .btn-reset:hover{ background:#fff5f5; }
 
-    /* TABS */
-    .tabs{
+    .logoSlot{
+      width:220px;
+      height:84px;
+      border-radius:14px;
+      box-shadow: var(--shadow2);
+      border:1px dashed rgba(15,23,42,.18);
+      background: linear-gradient(180deg, rgba(254,217,51,.20), rgba(255,255,255,.70));
       display:flex;
-      gap:4px;
-      margin-bottom:8px;
-      background:var(--card);
-      border-radius:8px;
-      border:1px solid var(--borde);
-      padding:4px;
-    }
-    .tab-btn{
-      flex:1 1 0;
-      border:none;
-      background:transparent;
-      padding:6px 8px;
-      border-radius:6px;
-      font-size:0.9rem;
-      font-weight:600;
-      color:var(--texto-suave);
-      cursor:pointer;
-          display:flex;
       align-items:center;
       justify-content:center;
-      text-decoration:none;
-    }
-    .tab-btn.active{ background:var(--rojo); color:#ffffff; }
-    .tab-panel{ display:none; }
-    .tab-panel.active{ display:block; }
-
-    /* PASOS */
-    .pasos{
-      background:var(--card);
-      border-radius:8px;
-      border:1px solid var(--borde);
-      padding:8px 10px;
-      margin-bottom:10px;
-      font-size:0.9rem;
-    }
-    .pasos strong{ color:var(--rojo-osc); }
-
-    /* RESUMEN GENERAL */
-    .resumen{
-      display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;
-    }
-    .resumen-card{
-      flex:1 1 155px;min-width:155px;
-      background:var(--card);border-radius:8px;border:1px solid var(--borde);
-      padding:8px 10px;
-    }
-    .res-label{
-      font-size:0.8rem;color:var(--texto-suave);
+      font-weight:900;
+      color: rgba(11,15,20,.70);
+      letter-spacing:.18em;
       text-transform:uppercase;
+      user-select:none;
     }
-    .res-value{ font-size:1.5rem;font-weight:800; }
+    .logoSlot small{
+      font-weight:800;
+      letter-spacing:.08em;
+      color: rgba(11,15,20,.55);
+      display:block;
+      margin-top:4px;
+      text-transform:none;
+    }
 
-    /* FLETEROS */
-    .fleteros-actions{
-      background:var(--card);
-      border-radius:8px;
-      border:1px solid var(--borde);
-      padding:8px 10px;
-      margin-bottom:10px;
-      display:flex;
-      flex-wrap:wrap;
-      align-items:center;
-      gap:8px;
-      font-size:0.85rem;
-    }
-    .fleteros-title{
-      font-weight:700;color:var(--rojo-osc);
-      margin-right:4px;
-    }
-    .btn-fletero{
-      background:#ffffff;
-      color:var(--rojo);
-      border:1px solid var(--rojo);
+    .titleBox{ display:flex; flex-direction:column; gap:6px; }
+    h1{ margin:0; font-size:24px; font-weight:900; letter-spacing:.2px; }
+    .sub{ margin:0; color:var(--muted); font-size:14px; line-height:1.35; max-width:92ch; }
+
+    .controls{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:8px; }
+    .pill{
+      border:1px solid rgba(15,23,42,.12);
       border-radius:999px;
-      padding:4px 10px;
-      font-size:0.8rem;
-      font-weight:700;
-      cursor:pointer;
-    }
-    .btn-fletero:hover{ background:#fff5f5; }
-
-    /* VUELTAS */
-    .vueltas{ display:flex;flex-direction:column;gap:10px;margin-bottom:10px; }
-    .vuelta-card{
-      background:var(--card);
-      border-radius:8px;
-      border:1px solid var(--borde);
-      padding:8px 10px;
-    }
-    .vuelta-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:6px;
-      cursor:pointer;
-    }
-    .vuelta-info{
-      font-size:1rem;font-weight:800;
-      display:flex;align-items:center;gap:6px;
-    }
-    .vuelta-nombre{ color:var(--rojo); font-size:1.05rem; }
-    .toggle-icon{
-      font-size:0.9rem;width:14px;text-align:center;color:var(--texto-suave);
-    }
-    .vuelta-total{ font-size:0.9rem;font-weight:700; }
-    .vuelta-total span{ color:var(--rojo-osc); }
-    .vuelta-buttons{
-      display:flex;flex-direction:column;gap:2px;align-items:flex-end;
-      font-size:0.78rem;color:var(--texto-suave);
-    }
-    .vuelta-body{ margin-top:4px; }
-    .vuelta-card.collapsed .vuelta-body{ display:none; }
-
-    /* TABLAS PRINCIPALES */
-    .tabla-wrap{ overflow-x:auto; }
-    table{
-      width:100%;
-      border-collapse:collapse;
-      font-size:0.9rem;
-    }
-    th,td{
-      padding:6px 7px;
-      border-bottom:1px solid #e0e0e0;
-      text-align:left;
-      vertical-align:middle;
-    }
-    thead{ background:#f9f9f9; }
-    th{ font-weight:700;color:#333333; }
-    tbody tr:nth-child(even){ background:#fafafa; }
-    tbody tr.tiene{ background:#fff9d6; }
-
-    .col-taller{ min-width:180px; }
-    .col-fletero{ width:130px; text-align:left; }
-    .col-cant{ width:90px; text-align:center; }
-    .col-obs{ min-width:200px; }
-
-    .input-num{
-      width:100%;
-      max-width:90px;
-      padding:5px 4px;
-      font-size:0.95rem;
-      text-align:right;
-      border-radius:4px;
-      border:1px solid #cccccc;
-      height:32px;
-    }
-    .input-num:focus{ border-color:var(--rojo);outline:none; }
-
-    .input-text{
-      width:100%;
-      padding:5px 6px;
-      font-size:0.95rem;
-      border-radius:4px;
-      border:1px solid #cccccc;
-      height:32px;
-    }
-    .input-text:focus{ border-color:var(--rojo);outline:none; }
-
-    .select-fletero,
-    .select-estado{
-      width:100%;
-      max-width:130px;
-      padding:4px 3px;
-      font-size:0.85rem;
-      border-radius:4px;
-      border:1px solid #cccccc;
-      background:#ffffff;
-      height:32px;
-    }
-    .select-fletero:focus,
-    .select-estado:focus{ border-color:var(--rojo);outline:none; }
-
-    /* TAB ESTADO */
-    .estado-info{
-      background:var(--card);
-      border-radius:8px;
-      border:1px solid var(--borde);
-      padding:8px 10px;
-      margin-bottom:8px;
-      font-size:0.9rem;
-      color:var(--texto-suave);
-    }
-    .estado-tag{ font-weight:600; }
-
-    .estado-resumen{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      margin-bottom:8px;
-    }
-    .estado-res-card{
-      flex:1 1 110px;
-      min-width:110px;
-      background:var(--card);
-      border-radius:8px;
-      border:1px solid var(--borde);
-      padding:6px 8px;
-      font-size:0.85rem;
-    }
-    .estado-res-label{
-      font-size:0.75rem;
-      text-transform:uppercase;
-      color:var(--texto-suave);
-    }
-    .estado-res-value{ font-size:1.1rem;font-weight:700; }
-
-    .estado-filtros{
-      display:flex;
-      flex-wrap:wrap;
-      align-items:center;
-      gap:8px;
-      margin-bottom:8px;
-      font-size:0.85rem;
-    }
-    .estado-filtros label{ font-weight:600;color:var(--texto-suave); }
-    .estado-select{
-      padding:4px 6px;
-      border-radius:6px;
-      border:1px solid #d1d5db;
-      background:#ffffff;
-      font-size:0.85rem;
-    }
-
-    .estado-botones-masivo{
-      display:flex;
-      flex-wrap:wrap;
-      gap:6px;
-      margin-bottom:8px;
-      font-size:0.8rem;
-    }
-    .estado-btn-masivo{
-      padding:4px 8px;
-      border-radius:6px;
-      border:1px solid var(--rojo);
-      background:#ffffff;
-      color:var(--rojo);
-      cursor:pointer;
-    }
-    .estado-btn-masivo:hover{ background:#fff5f5; }
-
-    /* COLORES ESTADOS: retiro gris, proceso amarillo, listo azul, entregado verde */
-    .estado-retiro{ background:#e5e7eb !important; }
-    .estado-proceso{ background:#fef9c3 !important; }
-    .estado-listo{ background:#dbeafe !important; }
-    .estado-entregado{ background:#dcfce7 !important; }
-
-    /* PANEL ORDEN / IMPRESIÓN */
-    .orden-overlay{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,0.45);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      z-index:9500;
-    }
-    .orden-card{
-      width:100%;
-      max-width:820px;
-      max-height:90vh;
-      background:#ffffff;
-      border-radius:8px;
-      border:1px solid #e5e7eb;
-      box-shadow:0 12px 40px rgba(0,0,0,0.35);
-      display:flex;
-      flex-direction:column;
+      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.82));
+      box-shadow:var(--shadow2);
       padding:10px 12px;
+      display:flex; flex-direction:column; gap:6px;
     }
-    .orden-header h2{ margin:0 0 4px;font-size:1rem; }
-    .orden-header p{ margin:0;font-size:0.85rem;color:#6b7280; }
-    .orden-table-wrap{
-      flex:1 1 auto;
-      overflow:auto;
-      margin-top:6px;
+    .pill label{ font-size:10.8px; letter-spacing:.10em; text-transform:uppercase; color:var(--muted); font-weight:900; }
+    .pill input{
+      height:28px;
+      border-radius:10px;
+      border:1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.88);
+      padding:0 10px;
+      font-family:var(--mono);
+      font-weight:900;
+      outline:none;
     }
-    .orden-table{
-      width:100%;
-      border-collapse:collapse;
-      font-size:0.85rem;
+    .pill input:focus{ box-shadow:var(--focus); border-color: rgba(203,40,17,.45); }
+
+    .tabs{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .tab{
+      border:1px solid rgba(15,23,42,.12);
+      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.82));
+      box-shadow:var(--shadow2);
+      border-radius:999px;
+      padding:10px 14px;
+      font-weight:950;
+      color:var(--muted);
+      cursor:pointer;
+      transition: transform .08s ease, background .15s ease, border-color .15s ease;
+      user-select:none;
     }
-    .orden-table th,
-    .orden-table td{
-      padding:4px 6px;
-      border-bottom:1px solid #e5e7eb;
-      text-align:left;
+    .tab:active{ transform: translateY(1px); }
+    .tab.active{
+      color: var(--qd);
+      border-color: rgba(203,40,17,.40);
+      background: linear-gradient(180deg, rgba(254,217,51,.35), rgba(254,217,51,.14));
+    }
+
+    .kpis{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+    .kpi{ min-width:200px;
+      border:1px solid rgba(15,23,42,.10);
+      border-radius:999px;
+      background: linear-gradient(180deg, rgba(255,255,255,.94), rgba(255,255,255,.84));
+      box-shadow:var(--shadow2);
+      padding:10px 14px;
+      display:flex; flex-direction:column; gap:3px;
+    }
+    .kpi .lbl{ font-size:12.6px; color:var(--muted); font-weight:900; }
+    .kpi .val{ font-family:var(--mono); font-size:16px; font-weight:950; }
+    .pos{ color:var(--pos); }
+    .neg{ color:var(--neg); }
+
+    main{ margin-top:14px; display:grid; gap:14px; }
+
+    .card{
+      border:1px solid var(--line);
+      border-radius:var(--r);
+      background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.86));
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .cardHead{
+      padding:14px 16px 12px;
+      border-bottom:1px solid var(--line);
+      display:flex; gap:10px; align-items:flex-start; justify-content:space-between; flex-wrap:wrap;
+    }
+    .h2{ margin:0; font-size:13px; font-weight:950; }
+    .hint{ margin-top:4px; font-size:12px; color:var(--muted); }
+
+    form{
+      padding:16px;
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr 1.6fr 1fr 1fr auto;
+      gap:10px;
+      align-items:end;
+    }
+    @media (max-width: 1000px){ form{ grid-template-columns: 1fr 1fr 1fr 1fr; } .span2{ grid-column:span 2; } }
+    @media (max-width: 560px){ form{ grid-template-columns: 1fr 1fr; } .span2{ grid-column:span 2; } }
+
+    .field{ display:flex; flex-direction:column; gap:6px; min-width:0; }
+    .field label{ font-size:12.8px; color:var(--muted); font-weight:900; }
+    input,select{ height:46px;
+      border-radius:var(--r2);
+      border:1px solid rgba(15,23,42,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.94), rgba(255,255,255,.84));
+      box-shadow: var(--inset);
+      padding:0 12px;
+      outline:none;
+      min-width:0;
+      transition: box-shadow .15s ease, border-color .15s ease;
+    }
+    input[type="number"]{ font-family:var(--mono); }
+    input:focus,select:focus{ border-color: rgba(203,40,17,.45); box-shadow: var(--focus), var(--inset); }
+
+    .btn{ height:46px;
+      padding:0 14px;
+      border-radius:var(--r2);
+      border:1px solid rgba(15,23,42,.12);
+      background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.84));
+      box-shadow:var(--shadow2);
+      cursor:pointer;
+      font-weight:950;
+      transition: transform .08s ease, border-color .15s ease, background .15s ease;
+      white-space:nowrap;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn:focus{ outline:none; box-shadow: var(--focus), var(--shadow2); }
+    .btn.primary{
+      border-color: rgba(203,40,17,.30);
+      background: linear-gradient(180deg, rgba(254,217,51,.55), rgba(254,217,51,.22));
+      color: var(--qd);
+    }
+    .btn.danger{
+      border-color: rgba(185,28,28,.25);
+      background: linear-gradient(180deg, rgba(185,28,28,.10), rgba(185,28,28,.06));
+      color: var(--neg);
+    }
+    .btn.ghost{ background:transparent; box-shadow:none; }
+
+    .tableWrap{ overflow:auto; border-top:1px solid var(--line); }
+    table{ width:100%; border-collapse:separate; border-spacing:0; min-width:980px; }
+    thead th{ position:sticky; top:0; z-index:5; text-align:left; font-size:12px; letter-spacing:.12em; text-transform:uppercase;
+      color:var(--muted);
+      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.90));
+      border-bottom:1px solid var(--line);
+      padding:12px;
+      white-space:nowrap;
+    }
+    tbody td{
+      font-size:14px;
+      padding:10px 12px;
+      border-bottom:1px solid rgba(15,23,42,.08);
+      background: rgba(255,255,255,.74);
+      transition: background .12s ease;
       vertical-align:middle;
     }
-    .orden-table thead{ background:#f9fafb; }
-    .orden-col-num{ width:32px;text-align:center; }
-    .orden-col-vuelta{ width:70px; }
-    .orden-col-cant{ width:70px;text-align:right; }
-    .orden-col-acciones{ width:80px;text-align:center; }
+    tbody tr:hover td{ background: rgba(254,217,51,.10); }
 
-    .orden-btn-small{
-      padding:2px 6px;
-      border-radius:4px;
-      border:1px solid #d1d5db;
-      background:#ffffff;
-      font-size:0.7rem;
-      cursor:pointer;
-      margin:0 1px;
+    td.num{ text-align:right; font-family:var(--mono); }
+    td.rent.pos{ color:var(--pos); font-weight:950; }
+    td.rent.neg{ color:var(--neg); font-weight:950; }
+
+    .cellInput,.cellSelect{ width:100%; height:44px;
+      border-radius:12px;
+      border:1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.86);
+      padding:0 10px;
+      box-shadow: var(--inset);
+      outline:none;
+      transition: box-shadow .15s ease, border-color .15s ease;
+      font-size:14.5px;
     }
-    .orden-btn-small:hover{ background:#f3f4f6; }
+    .cellInput.num{ text-align:right; font-family:var(--mono); }
+    .cellInput:focus,.cellSelect:focus{ border-color: rgba(203,40,17,.45); box-shadow: var(--focus), var(--inset); }
 
-    .orden-footer{
-      margin-top:8px;
-      display:flex;
-      justify-content:flex-end;
-      gap:8px;
+    tfoot td{
+      padding:12px;
+      background: linear-gradient(180deg, rgba(255,255,255,.94), rgba(255,255,255,.86));
+      border-top:1px solid var(--line);
+      font-weight:950;
     }
-    .orden-btn-sec{
-      padding:5px 10px;
-      border-radius:4px;
-      border:1px solid #d1d5db;
-      background:#ffffff;
-      color:#374151;
-      font-size:0.8rem;
-      font-weight:500;
-      cursor:pointer;
+    tfoot .label{ color:var(--muted); }
+    tfoot td.num{ font-family:var(--mono); }
+
+    .hide{ display:none !important; }
+
+    /* Resultado */
+    .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:16px; }
+    @media (max-width: 980px){ .grid2{ grid-template-columns:1fr; } }
+    .stat{
+      border:1px solid rgba(15,23,42,.10);
+      border-radius:16px;
+      background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.88));
+      box-shadow:var(--shadow2);
+      padding:14px;
+      display:flex; flex-direction:column; gap:6px;
     }
-    .orden-btn-sec:hover{ background:#f3f4f6; }
-    .orden-btn-main{
-      padding:5px 10px;
-      border-radius:4px;
-      border:1px solid var(--rojo);
-      background:var(--rojo);
-      color:#ffffff;
-      font-size:0.8rem;
-      font-weight:600;
-      cursor:pointer;
+    .stat .t{ color:var(--muted); font-size:12px; font-weight:900; }
+    .stat .v{ font-family:var(--mono); font-size:18px; font-weight:950; }
+    .stat .d{ color:var(--muted); font-size:12px; line-height:1.35; }
+
+    /* Gráfico: Gastos vs Neta */
+    .chart{
+      border-top:1px solid var(--line);
+      padding:16px;
+      display:grid;
+      gap:12px;
     }
-    .orden-btn-main:hover{ background:#b91c1c; }
+    .axisNote{
+      display:flex; justify-content:space-between; gap:10px;
+      color:var(--muted); font-size:12px; font-weight:900;
+    }
+    .hbar{
+      border:1px solid rgba(15,23,42,.08);
+      background: rgba(255,255,255,.74);
+      box-shadow:var(--shadow2);
+      border-radius:16px;
+      padding:12px;
+      display:grid;
+      grid-template-columns: 160px 1fr 140px;
+      gap:12px;
+      align-items:center;
+    }
+    @media (max-width: 740px){ .hbar{ grid-template-columns:1fr; } .rightVal{ text-align:left !important; } }
+    .hbar .name{ font-weight:950; font-size:12.5px; }
+    .track{
+      position:relative;
+      height:18px;
+      border-radius:999px;
+      background: linear-gradient(180deg, rgba(15,23,42,.06), rgba(15,23,42,.03));
+      border:1px solid rgba(15,23,42,.08);
+      overflow:hidden;
+    }
+    .track::after{
+      content:"";
+      position:absolute; left:50%; top:-6px;
+      width:2px; height:30px;
+      background: rgba(15,23,42,.14);
+    }
+    .barBlue,.barPos,.barNeg{
+      position:absolute; top:0; height:100%;
+      border-radius:999px;
+    }
+    .barBlue{
+      left:50%;
+      width:var(--wblue,0%);
+      background: linear-gradient(180deg, rgba(203,40,17,.30), rgba(254,217,51,.48));
+      border:1px solid rgba(203,40,17,.20);
+    }
+    .barPos{
+      left:50%;
+      width:var(--wpos,0%);
+      background: linear-gradient(180deg, rgba(15,118,110,.55), rgba(15,118,110,.32));
+      border:1px solid rgba(15,118,110,.28);
+    }
+    .barNeg{
+      right:50%;
+      width:var(--wneg,0%);
+      background: linear-gradient(180deg, rgba(185,28,28,.45), rgba(185,28,28,.26));
+      border:1px solid rgba(185,28,28,.26);
+    }
+    .rightVal{ text-align:right; font-family:var(--mono); font-weight:950; }
 
-    /* IMPRESIÓN A4 */
-    @media print{
-      @page{ size:A4 portrait; margin:8mm; }
-      body{ background:#ffffff; }
+    footer{
+      margin-top:14px;
+      border:1px solid var(--line);
+      border-radius:var(--r);
+      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.82));
+      box-shadow:var(--shadow);
+      padding:12px 16px;
+      display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;
+    }
+    .footNote{ color:var(--muted); font-size:12.5px; }
 
-      /* Cuando imprimimos el checklist de VÁLVULAS: ocultar todo menos tab-valvulas */
-      body.print-valvulas .header,
-      body.print-valvulas .tabs,
-      body.print-valvulas #tab-carga,
-      body.print-valvulas #tab-estado,
-      body.print-valvulas .splash-overlay,
-      body.print-valvulas .orden-overlay{
-        display:none !important;
-      }
-
-      body.print-valvulas #tab-valvulas{
-        display:block !important;
-      }
-
-      body.print-valvulas #valv-responsable{
-        border:none !important;
-        border-bottom:2px solid #111 !important;
-        border-radius:0 !important;
-        padding:2px 4px !important;
-        min-width:260px !important;
-        font-size:20px !important;
-      }
-
-      body.print-valvulas #valv-fecha{
-        border:none !important;
-        border-bottom:2px solid #111 !important;
-        border-radius:0 !important;
-        padding:2px 4px !important;
-        min-width:140px !important;
-        font-size:20px !important;
-        background:#fff !important;
-      }
-
-
-      body.print-valvulas #tab-valvulas .estado-info{
-        border:none;
-        padding:0;
-        margin-bottom:10px;
-      }
-
-      body.print-valvulas table{
-        font-size:16px;
-      }
-      body.print-valvulas th, body.print-valvulas td{
-        padding:6px 8px;
-      }
+    .sr-only{
+      position:absolute !important;
+      width:1px;height:1px;
+      padding:0;margin:-1px;
+      overflow:hidden;clip:rect(0,0,0,0);
+      white-space:nowrap;border:0;
     }
 
-    @media(max-width:720px){
-      body{ font-size:15px;padding:8px; }
-      .header{ flex-direction:column;align-items:flex-start;gap:6px; }
-      .header-right{ align-items:flex-start; }
-      .header-title{ font-size:1.1rem; }
-      table{ font-size:0.8rem; }
-      th,td{ padding:4px 5px; }
-      .input-num,.input-text,.select-fletero,.select-estado{
-        font-size:0.8rem;height:30px;
+    
+    /* Mobile table -> cards */
+    @media (max-width: 720px){
+      .tableWrap{ border-top:0; }
+      table{ min-width:0 !important; }
+      thead{ display:none; }
+      tbody, tr, td{ display:block; width:100%; }
+      tbody tr{
+        border:1px solid rgba(15,23,42,.10);
+        border-radius:16px;
+        margin:12px;
+        overflow:hidden;
+        box-shadow: var(--shadow2);
       }
-      .col-fletero{ width:110px; }
+      tbody td{
+      font-size:14px;
+        border-bottom:1px solid rgba(15,23,42,.08);
+        background: rgba(255,255,255,.86);
+        padding:10px 12px 12px;
+      }
+      tbody td:last-child{ border-bottom:0; }
+      tbody td::before{
+        content: attr(data-label);
+        display:block;
+        font-size:10.5px;
+        letter-spacing:.10em;
+        text-transform:uppercase;
+        color:var(--muted);
+        font-weight:950;
+        margin-bottom:6px;
+      }
+      td.num{ text-align:left; }
+      .cellInput,.cellSelect{ height:44px; font-size:14px; }
+      .btn{ height:44px; }
+      tfoot{ display:block; }
+      tfoot tr, tfoot td{ display:block; width:100%; }
+      tfoot td{ border-top:0; }
     }
-  </style>
+
+    @media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
+  
+    /* Admin oculto */
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.55)}
+    #btnAdmin{display:none}
+    /* Modal admin */
+    .modalBack{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:9999;padding:16px}
+    .modal{width:min(720px,100%);border-radius:22px;border:1px solid rgba(255,255,255,.16);background:rgba(18,18,22,.92);box-shadow:0 20px 60px rgba(0,0,0,.55);overflow:hidden}
+    .modalHd{padding:18px 18px 12px;border-bottom:1px solid rgba(255,255,255,.10);display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .modalHd h3{margin:0;font-size:16px;letter-spacing:.2px}
+    .modalBd{padding:16px 18px 18px;display:grid;gap:12px}
+    .modalBd .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    .modalBd input{flex:1;min-width:220px}
+    .dangerBox{padding:12px 14px;border-radius:16px;border:1px solid rgba(255,80,80,.25);background:rgba(255,60,60,.07)}
+    .dangerBox .ttl{font-weight:800;letter-spacing:.2px;margin-bottom:6px}
+    .tiny{font-size:12px;opacity:.75}
+</style>
 </head>
-<body>
-  <!-- SPLASH -->
-  <div id="splash" class="splash-overlay">
-    <div class="splash-logo-wrapper">
-      <div class="splash-logo-circle">Q</div>
-      <div class="splash-text-main">CRPC Quiroga</div>
-      <div class="splash-text-sub">Retiro de cilindros</div>
-    </div>
-  </div>
 
-  <div class="page">
-    <!-- CABECERA -->
-    <header class="header">
-      <div class="header-left">
-        <div class="logo">Q</div>
-        <div>
-          <h1 class="header-title">Retiro de cilindros por taller</h1>
-          <p class="header-sub">Carga de talleres, fleteros, estado general y checklist de válvulas.</p>
+<body>
+  <div class="wrap">
+    <header role="banner" aria-label="Encabezado">
+      <div class="brandBar" aria-hidden="true"></div>
+      <div class="brand">
+        <div class="titleBox">
+          <h1>Calculador de Rentabilidad QUIRGROUP ALEM 642</h1>
+          <div class="controls" aria-label="Controles">
+            <div class="pill" aria-label="Selector de mes">
+              <label for="monthPick">Mes</label>
+              <input id="monthPick" type="month" aria-label="Seleccionar mes" />
+            </div>
+
+            <div class="tabs" role="tablist" aria-label="Pestañas">
+              <button class="tab active" id="tabOpsBtn" role="tab" aria-selected="true" aria-controls="panelOps">Operaciones</button>
+              <button class="tab" id="tabGastosBtn" role="tab" aria-selected="false" aria-controls="panelGastos">Gastos</button>
+              <button class="tab" id="tabResultadoBtn" role="tab" aria-selected="false" aria-controls="panelResultado">Resultado</button>
+              <button class="tab" id="tabConteoBtn" role="tab" aria-selected="false" aria-controls="panelConteo">Conteo</button>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="header-right">
-        <div class="chip">Uso interno CRPC</div>
-        <button id="btn-reset" class="btn-reset">Reiniciar día</button>
+
+      <div class="kpis" aria-label="KPIs del mes">
+        <div class="kpi">
+          <div class="lbl">Facturación Bruta (Mes)</div>
+          <div id="kpiRentBruta" class="val pos">ARS 0</div>
+        </div>
+        <div class="kpi">
+          <div class="lbl">Gastos (Mes)</div>
+          <div id="kpiGastos" class="val">ARS 0</div>
+        </div>
+        <div class="kpi">
+          <div class="lbl">Rentabilidad VAO (Mes)</div>
+          <div id="kpiVAO" class="val">ARS 0</div>
+        </div>
+        <div class="kpi">
+          <div class="lbl">Rentabilidad Neta (Mes)</div>
+          <div id="kpiNeta" class="val pos">ARS 0</div>
+        </div>
       </div>
     </header>
 
-    <!-- TABS -->
-    <nav class="tabs">
-      <button class="tab-btn active" data-tab="carga">Carga y reparto</button>
-      <button class="tab-btn" data-tab="estado">Estado cilindros</button>
-      <button class="tab-btn" data-tab="valvulas">Válvulas</button>
-            <button class="tab-btn" data-tab="mantenimiento">Mantenimiento CRPC</button>
-<a class="tab-btn tab-external" href="https://shutten232.github.io/EstadisticasQuiroga/#hoy" target="_blank" rel="noopener">IMPACTO CRPC</a>
-
-    </nav>
-
-    <!-- TAB CARGA -->
-    <section id="tab-carga" class="tab-panel active">
-      <section class="pasos">
-        <div><strong>PASO 1:</strong> Cargar cantidad de cilindros de cada taller.</div>
-        <div><strong>PASO 2:</strong> Elegir fletero en cada taller (Agustín / Jorge / Rodrigo / Joaquín).</div>
-        <div><strong>PASO 3:</strong> Marcar <strong>Devolver válvula</strong> si a ese taller le devolvemos válvulas (todas sus PH del día).</div>
-        <div><strong>PASO 4:</strong> Observaciones si hace falta.</div>
-        <div><strong>PASO 5:</strong> En FLETEROS elegís el nombre, acomodás el orden con las flechas y desde ahí imprimís.</div>
-      </section>
-
-      <section class="resumen">
-        <div class="resumen-card">
-          <div class="res-label">Cilindros totales</div>
-          <div class="res-value" id="cil-total-general">0</div>
-        </div>
-        <div class="resumen-card">
-          <div class="res-label">Vuelta 1</div>
-          <div class="res-value" id="cil-v1">0</div>
-        </div>
-        <div class="resumen-card">
-          <div class="res-label">Vuelta 2</div>
-          <div class="res-value" id="cil-v2">0</div>
-        </div>
-        <div class="resumen-card">
-          <div class="res-label">Vuelta 3</div>
-          <div class="res-value" id="cil-v3">0</div>
-        </div>
-      </section>
-
-      <section class="fleteros-actions">
-        <span class="fleteros-title">Fleteros</span>
-        <button class="btn-fletero btn-print-fletero" data-fletero="Agustin">Orden / Imprimir Agustín</button>
-        <button class="btn-fletero btn-print-fletero" data-fletero="Jorge">Orden / Imprimir Jorge</button>
-        <button class="btn-fletero btn-print-fletero" data-fletero="Rodrigo">Orden / Imprimir Rodrigo</button>
-        <button class="btn-fletero btn-print-fletero" data-fletero="Joaquin">Orden / Imprimir Joaquín</button>
-      </section>
-
-      <section class="vueltas">
-        <!-- V1 -->
-        <article class="vuelta-card" data-vuelta="1">
-          <div class="vuelta-header">
-            <div class="vuelta-info">
-              <span class="toggle-icon">▼</span>
-              <span class="vuelta-nombre">Vuelta 1</span>
-            </div>
-            <div class="vuelta-buttons">
-              <div class="vuelta-total">Cilindros: <span id="cil-v1-card">0</span></div>
+    <main role="main">
+      <!-- OPERACIONES -->
+      <section id="panelOps" role="tabpanel" aria-label="Panel operaciones">
+        <section class="card" aria-label="Formulario operaciones">
+          <div class="cardHead">
+            <div>
+              <div class="h2">Nueva operación</div>
+              <div class="hint">Se guarda por Fecha. La tabla muestra solo el mes seleccionado.</div>
             </div>
           </div>
-          <div class="vuelta-body">
-            <div class="tabla-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th class="col-taller">Taller</th>
-                    <th class="col-fletero">Fletero</th>
-                    <th class="col-cant">Cantidad</th>
-                    <th class="col-cant">Devolver válvula</th>
-                    <th class="col-obs">Observaciones</th>
-                  </tr>
-                </thead>
-                <tbody id="tbody-v1"></tbody>
-              </table>
+
+          <form id="addFormOps" autocomplete="off" novalidate aria-label="Formulario para agregar operación">
+            <div class="field">
+              <label for="inFecha">Fecha</label>
+              <input id="inFecha" type="date" aria-label="Fecha" required />
+            </div>
+
+            <div class="field">
+              <label for="inServicio">Servicio</label>
+              <select id="inServicio" aria-label="Servicio" required>
+                <option value="CONVERSION">CONVERSION</option>
+                <option value="OBLEAS">OBLEAS</option>
+                <option value="VAO">VAO</option>
+                <option value="PH">PH</option>
+                <option value="SERVICE">SERVICE</option>
+                <option value="OTRO">OTRO</option>
+              </select>
+            </div>
+
+            <div id="wrapTubos" class="field" style="display:none">
+              <label for="inTubos">Tubos (PH)</label>
+              <input id="inTubos" type="number" min="1" max="5" step="1" inputmode="numeric" value="1" aria-label="Cantidad de tubos para PH" />
+            </div>
+
+            <div class="field">
+              <label for="inDominio">Dominio</label>
+              <input id="inDominio" type="text" placeholder="ABC123" aria-label="Dominio" />
+            </div>
+
+            <div class="field span2">
+              <label for="inDesc">Descripción</label>
+              <input id="inDesc" type="text" placeholder="Detalle del trabajo" aria-label="Descripción" />
+            </div>
+
+            <div class="field">
+              <label for="inVenta">Venta</label>
+              <input id="inVenta" type="number" min="0" step="1" inputmode="numeric" placeholder="0" aria-label="Venta" required />
+            </div>
+
+            <div class="field">
+              <label for="inCosto">Costo</label>
+              <input id="inCosto" type="number" min="0" step="1" inputmode="numeric" placeholder="0" aria-label="Costo" required />
+            </div>
+
+            <button class="btn primary" type="submit" aria-label="Agregar operación">Agregar</button>
+          </form>
+        </section>
+
+        <section class="card" aria-label="Tabla operaciones" style="margin-top:14px;">
+          <div class="cardHead">
+            <div>
+              <div class="h2">Operaciones del mes</div>
+              <div class="hint">Buscar por servicio, dominio o descripción.</div>
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+              <label class="sr-only" for="searchOps">Buscar</label>
+              <input id="searchOps" type="text" placeholder="Buscar" aria-label="Buscar en operaciones" style="height:var(--h);min-width:280px;" />
+              <label class="sr-only" for="dayOps">Filtrar por día</label>
+              <input id="dayOps" type="date" aria-label="Filtrar operaciones por día" style="height:46px;min-width:170px;" />
+              <button id="btnClearOps" class="btn ghost" type="button" aria-label="Limpiar búsqueda">Limpiar</button>
+              <button id="btnClearDayOps" class="btn ghost" type="button" aria-label="Limpiar filtro por día">Día</button>
             </div>
           </div>
-        </article>
 
-        <!-- V2 -->
-        <article class="vuelta-card" data-vuelta="2">
-          <div class="vuelta-header">
-            <div class="vuelta-info">
-              <span class="toggle-icon">▼</span>
-              <span class="vuelta-nombre">Vuelta 2</span>
-            </div>
-            <div class="vuelta-buttons">
-              <div class="vuelta-total">Cilindros: <span id="cil-v2-card">0</span></div>
+          <div class="tableWrap" role="region" aria-label="Tabla editable de operaciones" tabindex="0">
+            <table aria-label="Tabla de operaciones">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Servicio</th>
+                  <th style="text-align:right">Tubos</th>
+                  <th>Dominio</th>
+                  <th>Descripción</th>
+                  <th style="text-align:right">Venta</th>
+                  <th style="text-align:right">Costo</th>
+                  <th style="text-align:right">Rentabilidad</th>
+                  <th style="text-align:right">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyOps"></tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="4" class="label">Totales del mes</td>
+                  <td id="tVentaOps" class="num">ARS 0</td>
+                  <td id="tCostoOps" class="num">ARS 0</td>
+                  <td id="tRentOps" class="num">ARS 0</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <!-- GASTOS -->
+      <section id="panelGastos" class="hide" role="tabpanel" aria-label="Panel gastos">
+        <section class="card" aria-label="Formulario gastos">
+          <div class="cardHead">
+            <div>
+              <div class="h2">Nuevo gasto</div>
+              <div class="hint">Se guarda por Fecha. La tabla muestra solo el mes seleccionado.</div>
             </div>
           </div>
-          <div class="vuelta-body">
-            <div class="tabla-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th class="col-taller">Taller</th>
-                    <th class="col-fletero">Fletero</th>
-                    <th class="col-cant">Cantidad</th>
-                    <th class="col-cant">Devolver válvula</th>
-                    <th class="col-obs">Observaciones</th>
-                  </tr>
-                </thead>
-                <tbody id="tbody-v2"></tbody>
-              </table>
+
+          <form id="addFormGastos" autocomplete="off" novalidate aria-label="Formulario para agregar gasto"
+                style="grid-template-columns: 1fr 1.2fr 2fr 1fr auto;">
+            <div class="field">
+              <label for="gFecha">Fecha</label>
+              <input id="gFecha" type="date" aria-label="Fecha de gasto" required />
+            </div>
+
+            <div class="field">
+              <label for="gCategoria">Categoría</label>
+              <select id="gCategoria" aria-label="Categoría de gasto" required>
+                <option value="SUELDOS">SUELDOS</option>
+                <option value="GENERAL">GENERAL</option>
+                <option value="SERVICIOS">SERVICIOS</option>
+                <option value="IMPUESTOS">IMPUESTOS</option>
+                <option value="COMBUSTIBLE">COMBUSTIBLE</option>
+                <option value="OTRO">OTRO</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="gDesc">Descripción</label>
+              <input id="gDesc" type="text" placeholder="Detalle del gasto" aria-label="Descripción del gasto" />
+            </div>
+
+            <div class="field">
+              <label for="gMonto">Monto</label>
+              <input id="gMonto" type="number" min="0" step="1" inputmode="numeric" placeholder="0" aria-label="Monto del gasto" required />
+            </div>
+
+            <button class="btn primary" type="submit" aria-label="Agregar gasto">Agregar</button>
+          </form>
+        </section>
+
+        <section class="card" aria-label="Tabla gastos" style="margin-top:14px;">
+          <div class="cardHead">
+            <div>
+              <div class="h2">Gastos del mes</div>
+              <div class="hint">Buscar por categoría o descripción.</div>
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+              <label class="sr-only" for="searchGastos">Buscar</label>
+              <input id="searchGastos" type="text" placeholder="Buscar" aria-label="Buscar en gastos" style="height:var(--h);min-width:280px;" />
+              <label class="sr-only" for="dayGastos">Filtrar por día</label>
+              <input id="dayGastos" type="date" aria-label="Filtrar gastos por día" style="height:46px;min-width:170px;" />
+              <button id="btnClearGastos" class="btn ghost" type="button" aria-label="Limpiar búsqueda">Limpiar</button>
+              <button id="btnClearDayGastos" class="btn ghost" type="button" aria-label="Limpiar filtro por día">Día</button>
             </div>
           </div>
-        </article>
 
-        <!-- V3 -->
-        <article class="vuelta-card" data-vuelta="3">
-          <div class="vuelta-header">
-            <div class="vuelta-info">
-              <span class="toggle-icon">▼</span>
-              <span class="vuelta-nombre">Vuelta 3</span>
-            </div>
-            <div class="vuelta-buttons">
-              <div class="vuelta-total">Cilindros: <span id="cil-v3-card">0</span></div>
+          <div class="tableWrap" role="region" aria-label="Tabla editable de gastos" tabindex="0">
+            <table aria-label="Tabla de gastos" style="min-width: 820px;">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Categoría</th>
+                  <th>Descripción</th>
+                  <th style="text-align:right">Monto</th>
+                  <th style="text-align:right">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyGastos"></tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3" class="label">Total gastos del mes</td>
+                  <td id="tGastos" class="num">ARS 0</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <!-- RESULTADO -->
+      <section id="panelResultado" class="hide" role="tabpanel" aria-label="Panel resultado">
+        <section class="card" aria-label="Resultado del mes">
+          <div class="cardHead">
+            <div>
+              <div class="h2">Resultado del mes</div>
+              <div class="hint">Gráfico: Gastos vs Rentabilidad Neta (misma escala).</div>
             </div>
           </div>
-          <div class="vuelta-body">
-            <div class="tabla-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th class="col-taller">Taller</th>
-                    <th class="col-fletero">Fletero</th>
-                    <th class="col-cant">Cantidad</th>
-                    <th class="col-cant">Devolver válvula</th>
-                    <th class="col-obs">Observaciones</th>
-                  </tr>
-                </thead>
-                <tbody id="tbody-v3"></tbody>
-              </table>
+
+          <div class="grid2" aria-label="Tarjetas del mes">
+            <div class="stat" aria-label="Ventas del mes">
+              <div class="t">Ventas del mes</div>
+              <div id="resVentas" class="v">ARS 0</div>
+              <div class="d">Suma de Venta en operaciones del mes.</div>
+            </div>
+
+            <div class="stat" aria-label="Rentabilidad bruta del mes">
+              <div class="t">Rentabilidad bruta del mes</div>
+              <div id="resBruta" class="v pos">ARS 0</div>
+              <div class="d">Suma (Venta - Costo) del mes.</div>
+            </div>
+
+            <div class="stat" aria-label="Gastos del mes">
+              <div class="t">Gastos del mes</div>
+              <div id="resGastos" class="v">ARS 0</div>
+              <div class="d">Suma de gastos del mes.</div>
+            </div>
+
+            <div class="stat" aria-label="Rentabilidad neta del mes">
+              <div class="t">Rentabilidad neta del mes</div>
+              <div id="resNeta" class="v pos">ARS 0</div>
+              <div id="resMeta" class="d">Margen neto: 0.00%</div>
             </div>
           </div>
-        </article>
-      </section>
-    </section>
 
-    <!-- TAB ESTADO -->
-    <section id="tab-estado" class="tab-panel">
-      <section class="estado-info">
-        Solo aparecen talleres con cilindros cargados (cantidad &gt; 0).
-        <br>
-        <span class="estado-tag">• En retiro (gris):</span> cilindros todavía en taller / en viaje.
-        <br>
-        <span class="estado-tag">• Proceso (amarillo):</span> cilindros en CRPC.
-        <br>
-        <span class="estado-tag">• Listo (azul):</span> cilindros terminados para entregar.
-        <br>
-        <span class="estado-tag">• Entregado (verde):</span> cilindros ya devueltos.
-      </section>
+          <div class="chart" aria-label="Gráfico Gastos vs Neta">
+            <div class="axisNote">
+              <div>← negativo</div>
+              <div id="chartScale" style="font-family:var(--mono);font-weight:950;">Escala: ARS 0</div>
+              <div>positivo →</div>
+            </div>
 
-      <section class="estado-resumen">
-        <div class="estado-res-card">
-          <div class="estado-res-label">En retiro</div>
-          <div class="estado-res-value" id="estado-retiro-count">0</div>
-        </div>
-        <div class="estado-res-card">
-          <div class="estado-res-label">Proceso</div>
-          <div class="estado-res-value" id="estado-proceso-count">0</div>
-        </div>
-        <div class="estado-res-card">
-          <div class="estado-res-label">Listo</div>
-          <div class="estado-res-value" id="estado-listo-count">0</div>
-        </div>
-        <div class="estado-res-card">
-          <div class="estado-res-label">Entregado</div>
-          <div class="estado-res-value" id="estado-entregado-count">0</div>
-        </div>
-      </section>
+            <div class="hbar" aria-label="Barra de gastos">
+              <div class="name">Gastos</div>
+              <div class="track" id="trackGastos" aria-label="Gastos sobre escala">
+                <div class="barBlue" id="barGastos" aria-hidden="true"></div>
+              </div>
+              <div class="rightVal" id="valGastos">ARS 0</div>
+            </div>
 
-      <section class="estado-filtros">
-        <label for="estado-filtro-fletero">Fletero:</label>
-        <select id="estado-filtro-fletero" class="estado-select">
-          <option value="todos">Todos</option>
-          <option value="Agustin">Agustín</option>
-          <option value="Jorge">Jorge</option>
-          <option value="Rodrigo">Rodrigo</option>
-          <option value="Joaquin">Joaquín</option>
-        </select>
-        <span style="font-size:0.8rem;color:var(--texto-suave);">El filtro afecta la tabla y el resumen.</span>
+            <div class="hbar" aria-label="Barra de rentabilidad neta">
+              <div class="name">Rentabilidad neta</div>
+              <div class="track" id="trackNeta" aria-label="Rentabilidad neta sobre escala">
+                <div class="barNeg" id="barNetaNeg" aria-hidden="true"></div>
+                <div class="barPos" id="barNetaPos" aria-hidden="true"></div>
+              </div>
+              <div class="rightVal pos" id="valNeta">ARS 0</div>
+            </div>
+          </div>
+
+          <div class="tableWrap" role="region" aria-label="Detalle numérico del mes" tabindex="0">
+            <table aria-label="Detalle del mes" style="min-width:760px;">
+              <thead><tr><th>Concepto</th><th style="text-align:right">Valor</th></tr></thead>
+              <tbody>
+                <tr><td>Total Venta</td><td class="num" id="resVentaRow">ARS 0</td></tr>
+                <tr><td>Total Costo</td><td class="num" id="resCostoRow">ARS 0</td></tr>
+                <tr><td>Total Rentabilidad Bruta</td><td class="num" id="resRentRow">ARS 0</td></tr>
+                <tr><td>Total Gastos</td><td class="num" id="resGastosRow">ARS 0</td></tr>
+              </tbody>
+              <tfoot><tr><td class="label">Resultado Neto</td><td class="num" id="resNetoRow">ARS 0</td></tr></tfoot>
+            </table>
+          </div>
+        </section>
       </section>
 
-      <section class="estado-botones-masivo">
-        <button id="btn-estado-todos-proceso" class="estado-btn-masivo">Pasar todos a Proceso</button>
-        <button id="btn-estado-todos-listo" class="estado-btn-masivo">Pasar todos a Listo</button>
-        <button id="btn-estado-todos-entregado" class="estado-btn-masivo">Pasar todos a Entregado</button>
+      <!-- CONTEO -->
+      <section id="panelConteo" class="hide" role="tabpanel" aria-label="Panel conteo">
+        <section class="card" aria-label="Conteo de operaciones del mes">
+          <div class="cardHead">
+            <div>
+              <div class="h2">Cantidad de operaciones (mes)</div>
+              <div class="hint">Cuenta cuántas operaciones tenés cargadas por tipo (solo del mes seleccionado).</div>
+            </div>
+          </div>
+
+          <div class="grid2" aria-label="KPIs de conteo">
+            <div class="stat" aria-label="Total de operaciones del mes">
+              <div class="t">Total operaciones</div>
+              <div id="cntTotalOps" class="v">0</div>
+              <div class="d">Cantidad total de filas en Operaciones (mes).</div>
+            </div>
+
+                        <div class="stat" aria-label="Tubos de PH del mes">
+              <div class="t">Tubos PH</div>
+              <div id="cntTubosPH" class="v">0</div>
+              <div class="d">Suma de tubos cargados en operaciones PH (mes).</div>
+            </div>
+
+
+            <div class="stat" aria-label="Operaciones VAO del mes">
+              <div class="t">VAO</div>
+              <div id="cntVAO" class="v">0</div>
+              <div class="d">Cantidad de operaciones VAO (mes).</div>
+            </div>
+
+            <div class="stat" aria-label="Operaciones CONVERSION del mes">
+              <div class="t">CONVERSION</div>
+              <div id="cntCONVERSION" class="v">0</div>
+              <div class="d">Cantidad de operaciones CONVERSION (mes).</div>
+            </div>
+
+            <div class="stat" aria-label="Operaciones SERVICE del mes">
+              <div class="t">SERVICE</div>
+              <div id="cntSERVICE" class="v">0</div>
+              <div class="d">Cantidad de operaciones SERVICE (mes).</div>
+            </div>
+
+            <div class="stat" aria-label="Operaciones OTRO del mes">
+              <div class="t">OTRO</div>
+              <div id="cntOTRO" class="v">0</div>
+              <div class="d">Cantidad de operaciones OTRO (mes).</div>
+            </div>
+
+<div class="stat" aria-label="Servicios con más carga">
+              <div class="t">Top del mes</div>
+              <div id="cntTop" class="v">—</div>
+              <div id="cntTopHint" class="d">—</div>
+            </div>
+          </div>
+
+          <div class="tableWrap" role="region" aria-label="Tabla de conteo por servicio" tabindex="0" style="display:none">
+            <table aria-label="Conteo por servicio" style="min-width:540px;">
+              <thead>
+                <tr>
+                  <th>Servicio</th>
+                  <th style="text-align:right">Cantidad</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyConteo"></tbody>
+              <tfoot>
+                <tr>
+                  <td class="label">Total</td>
+                  <td id="tConteo" class="num">0</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </section>
       </section>
 
-      <div class="tabla-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Taller</th>
-              <th>Vuelta</th>
-              <th>Cant.</th>
-              <th>Fletero</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody id="tbody-estado"></tbody>
-        </table>
+
+    </main>
+
+    <footer role="contentinfo" aria-label="Pie">
+      <div class="footNote" id="footHint">Exporta CSV del mes seleccionado (pestaña actual).</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button id="btnExport" class="btn primary" type="button" aria-label="Exportar CSV del mes">Exportar CSV (Mes)</button>
+        <button id="btnBackup" class="btn" type="button" aria-label="Descargar respaldo JSON de todo">Respaldo JSON (Todo)</button>
+        <button id="btnImport" class="btn" type="button" aria-label="Importar respaldo JSON">Importar JSON</button>
+        <input id="fileImport" type="file" accept="application/json" style="display:none" />
+        <button id="btnAdmin" class="btn ghost" type="button" aria-label="Administración (oculto)">Admin</button>
+</div>
+    </footer>
+  </div>
+
+  
+  
+  <!-- Modal Admin (oculto) -->
+  <div id="adminBack" class="modalBack" role="dialog" aria-modal="true" aria-label="Administración">
+    <div class="modal">
+      <div class="modalHd">
+        <h3>Administración</h3>
+        <button id="adminClose" class="btn" type="button" aria-label="Cerrar">Cerrar</button>
       </div>
-    </section>
-
-    <!-- TAB VÁLVULAS (CHECKLIST IMPRESO) -->
-    <section id="tab-valvulas" class="tab-panel">
-      <section class="estado-info">
-        Checklist de válvulas para depósito. Se genera con los PH cargados.
-        <br>
-        Regla: si un taller está marcado como <strong>Devolver válvula</strong>, ese taller suma 0 válvulas.
-      </section>
-
-      <section class="estado-resumen">
-        <div class="estado-res-card">
-          <div class="estado-res-label">Cilindros cargados</div>
-          <div class="estado-res-value" id="valv-cil">0</div>
-        </div>
-        <div class="estado-res-card">
-          <div class="estado-res-label">Talleres a los que devolvemos válvula</div>
-          <div class="estado-res-value" id="valv-sin">0</div>
-        </div>
-        <div class="estado-res-card">
-          <div class="estado-res-label">Válvulas a contar (físico)</div>
-          <div class="estado-res-value" id="valv-esp">0</div>
-        </div>
-      </section>
-
-      <section class="fleteros-actions" style="justify-content:space-between;">
-        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;">
-          <span class="fleteros-title">Impresión</span>
-
-          <div style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--rojo-osc);">
-            Fecha:
-            <span id="valv-fecha" style="display:inline-block;min-width:140px;padding:5px 8px;border-radius:6px;border:1px solid #cccccc;height:32px;line-height:20px;background:#fff;"></span>
-          </div>
-
-          <div style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--rojo-osc);">
-            Controló:
-            <input id="valv-responsable" type="text" placeholder=""
-              style="height:32px;padding:5px 8px;border-radius:6px;border:1px solid #cccccc;min-width:240px;font-size:0.9rem;">
+      <div class="modalBd">
+        <div class="row">
+          <div class="pill" style="width:100%">
+            <label for="adminMonth">Mes objetivo</label>
+            <input id="adminMonth" type="month" />
           </div>
         </div>
 
-        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
-          <button id="btn-valv-checklist" class="btn-fletero">Generar / Imprimir</button>
-          <span style="font-size:0.85rem;color:var(--texto-suave);">Imprime solo esta pestaña.</span>
+        <div class="dangerBox">
+          <div class="ttl">Acciones peligrosas</div>
+          <div class="tiny">Requiere CLAVE ESTRELLA: escribí exactamente ********</div>
+          <div class="row" style="margin-top:10px">
+            <input id="starKey" type="password" placeholder="********" aria-label="Clave estrella" />
+            <button id="adminDeleteMonth" class="btn danger" type="button">Borrar Mes (Ops + Gastos)</button>
+          </div>
+          <div class="row">
+            <input id="importKey" type="text" placeholder='Escribí IMPORTAR para confirmar' aria-label="Confirmación importar" />
+            <button id="adminRestoreAll" class="btn danger" type="button">Restaurar Backup (Sobrescribe Todo)</button>
+          </div>
+          <div class="tiny">Borrar Mes elimina datos del mes seleccionado. Restaurar Backup pisa toda la base de esta empresa.</div>
         </div>
-      </section>
 
-      <section class="estado-info" style="margin-top:8px;">
-        <strong>Checklist de recepción (válvulas a contar físicamente):</strong>
-      </section>
-
-      <div class="tabla-wrap" style="margin-bottom:10px;">
-        <table>
-          <thead>
-            <tr>
-              <th style="width:40px;">#</th>
-              <th style="width:70px;">Vuelta</th>
-              <th>Taller</th>
-              <th style="width:90px;text-align:right;">Válvulas</th>
-              <th style="width:110px;">Recibidas</th>
-              <th>Obs</th>
-            </tr>
-          </thead>
-          <tbody id="tbody-valv-checklist"></tbody>
-        </table>
-      </div>
-
-      <section class="estado-info" style="margin-top:10px;">
-        <strong>Talleres a los que devolvemos válvula (marcados “Devolver válvula”):</strong>
-      </section>
-
-      <div class="tabla-wrap" style="margin-bottom:10px;">
-        <table>
-          <thead>
-            <tr>
-              <th style="width:40px;">#</th>
-              <th style="width:70px;">Vuelta</th>
-              <th>Taller</th>
-              <th style="width:140px;text-align:right;">PH con devolución</th>
-              <th>Obs</th>
-            </tr>
-          </thead>
-          <tbody id="tbody-valv-sin"></tbody>
-        </table>
-      </div>
-    </section>
-
-
-    <!-- TAB MANTENIMIENTO -->
-    <section id="tab-mantenimiento" class="tab-panel">
-      <section class="estado-info">
-        Registro interno de mantenimiento CRPC. Cargá la fecha del último control y observaciones.
-      </section>
-
-      <div class="tabla-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th style="min-width:220px;">Equipo</th>
-              <th style="width:170px;">Último control</th>
-              <th>Observaciones</th>
-            </tr>
-          </thead>
-          <tbody id="tbody-mant"></tbody>
-        </table>
-      </div>
-
-      <div class="acciones" style="margin-top:12px;">
-        <button id="btn-print-mant" class="btn">Imprimir mantenimiento</button>
-      </div>
-    </section>
-
-<!-- PANEL ORDEN / IMPRESIÓN (FLETEROS) -->
-  <div id="orden-overlay" class="orden-overlay">
-    <div class="orden-card">
-      <div class="orden-header">
-        <h2>Orden de talleres – <span id="orden-fletero-nombre"></span></h2>
-        <p>Usá las flechas para acomodar el recorrido / ingreso. Después imprimís esta lista (PHS + observaciones).</p>
-      </div>
-      <div class="orden-table-wrap">
-        <table class="orden-table">
-          <thead>
-            <tr>
-              <th class="orden-col-num">#</th>
-              <th class="orden-col-vuelta">Vuelta</th>
-              <th>Taller</th>
-              <th class="orden-col-cant">PHS</th>
-              <th>Observaciones</th>
-              <th class="orden-col-acciones">Orden</th>
-            </tr>
-          </thead>
-          <tbody id="orden-tbody"></tbody>
-        </table>
-      </div>
-      <div class="orden-footer">
-        <button id="orden-cerrar" class="orden-btn-sec">Cerrar</button>
-        <button id="orden-imprimir" class="orden-btn-main">Imprimir</button>
+        <div class="row">
+          <div id="adminStatus" class="tiny"></div>
+        </div>
       </div>
     </div>
   </div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import { getDatabase, ref, push, set, update, remove, onValue, off, get } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      doc,
-      getDocs,
-      onSnapshot,
-      setDoc,
-      updateDoc,
-      writeBatch
-    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-    import {
-      getAuth,
-      signInAnonymously
-    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+  (() => {
+    "use strict";
+
+    /* =========================
+       Firebase Realtime Database
+       =========================
+       1) Pegá tu firebaseConfig real abajo (incluí databaseURL)
+       2) Habilitá Auth Anónimo en Firebase Auth
+       3) Realtime DB Rules (permanentes):
+          {
+            "rules": {
+              "rentabilidad": {
+                "$empresa": {
+                  "months": {
+                    "$month": {
+                      ".read": "auth != null",
+                      ".write": "auth != null"
+                    }
+                  }
+                }
+              }
+            }
+          }
+    */
 
     const firebaseConfig = {
-      apiKey: "AIzaSyC7p0rPT0sB4RGOqgHOu8gjdC8hcjuMO-8",
-      authDomain: "crpc-cilindros.firebaseapp.com",
-      projectId: "crpc-cilindros",
-      storageBucket: "crpc-cilindros.firebasestorage.app",
-      messagingSenderId: "6730395812",
-      appId: "1:6730395812:web:327d3f031e05fdbd33f631",
-      measurementId: "G-7FEQWXK5VB"
+      apiKey: "AIzaSyAf13w0qiHrJnJ3KRO78Q4_Tl17Bn4UsPs",
+      authDomain: "rentabilidadquirgroup.firebaseapp.com",
+      databaseURL: "https://rentabilidadquirgroup-default-rtdb.firebaseio.com",
+      projectId: "rentabilidadquirgroup",
+      storageBucket: "rentabilidadquirgroup.firebasestorage.app",
+      messagingSenderId: "250975835166",
+      appId: "1:250975835166:web:16d10b1699ae48e614ca0f"
     };
 
-    const app = initializeApp(firebaseConfig);
+    const APP = initializeApp(firebaseConfig);
+    const AUTH = getAuth(APP);
+    const DB = getDatabase(APP);
 
-    // AUTH ANÓNIMO
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const colTalleres = collection(db, "talleres_reparto");
+    // Cambiá si querés otro "espacio" (otra empresa / otra instancia)
+    const EMPRESA_ID = "quirgroup";
 
-    
-    // MANTENIMIENTO CRPC (se guarda en la misma colección con prefijo para no depender de reglas nuevas)
-    const MANT_PREFIX = "__mant__";
-    const defaultMantenimiento = [
-      { id:"maquina-ph", equipo:"Máquina PH", fecha:"", obs:"" },
-      { id:"granalladora", equipo:"Granalladora", fecha:"", obs:"" },
-      { id:"potros", equipo:"Potros", fecha:"", obs:"" },
-      { id:"compresor", equipo:"Compresor", fecha:"", obs:"" },
-      { id:"maquina-pintar", equipo:"Máquina de pintar", fecha:"", obs:"" },
-      { id:"motores", equipo:"Motores", fecha:"", obs:"" },
-      { id:"imanes", equipo:"Imanes", fecha:"", obs:"" },
-      { id:"hidrolavadora", equipo:"Hidrolavadora", fecha:"", obs:"" }
-    ];
-const splashEl = document.getElementById("splash");
-    if(splashEl){
-      splashEl.addEventListener("animationend", () => {
-        splashEl.style.display = "none";
-      });
-    }
+    const SERVICE_OPTIONS = ["CONVERSION","OBLEAS","VAO","PH","SERVICE","OTRO"];
+    const GASTO_CATS = ["SUELDOS","GENERAL","SERVICIOS","IMPUESTOS","COMBUSTIBLE","OTRO"];
 
-    const ordenManual = {
-      "minuto-gnc":1,"silvana-calera":2,"calera-torres-gnc":3,"zico":4,"colon-gnc":5,"tabach-gnc":6,"franco-alta-gracia":7,"servincor":8,"bruno-f":9,
-      "porto-alta-gracia":10,"brochero-gnc":11,"valparaiso-gnc":12,"canovas":13,"malvinas-gnc":14,"genesis-gnc":15,"alem":16,"cars":17,"forteza-gnc":18,
-      "enero-gas":19,"pepe":20,"san-francisco-gnc":21,"genovesio":22,"gnc-giordano":23,"tecno-gnc":24,"marcos-gnc":25,"franco-cba":26,"franc-villa-dolores":27,
-      "leal":28,"misiti":29,"enjom":30,"alemanes":31,"acosta":32,"ceriani":33,"otros-v3":99999
+    const $ = (s) => document.querySelector(s);
+
+    const els = {
+      monthPick: $("#monthPick"),
+
+      tabOpsBtn: $("#tabOpsBtn"),
+      tabGastosBtn: $("#tabGastosBtn"),
+      tabResultadoBtn: $("#tabResultadoBtn"),
+      tabConteoBtn: $("#tabConteoBtn"),
+      panelOps: $("#panelOps"),
+      panelGastos: $("#panelGastos"),
+      panelResultado: $("#panelResultado"),
+      panelConteo: $("#panelConteo"),
+      footHint: $("#footHint"),
+
+      kpiRentBruta: $("#kpiRentBruta"),
+      kpiGastos: $("#kpiGastos"),
+      kpiVAO: $("#kpiVAO"),
+      kpiNeta: $("#kpiNeta"),
+
+      addFormOps: $("#addFormOps"),
+      inFecha: $("#inFecha"),
+      inServicio: $("#inServicio"),
+      inDominio: $("#inDominio"),
+      inDesc: $("#inDesc"),
+      inVenta: $("#inVenta"),
+      inCosto: $("#inCosto"),
+      searchOps: $("#searchOps"),
+      btnClearOps: $("#btnClearOps"),
+      dayOps: $("#dayOps"),
+      btnClearDayOps: $("#btnClearDayOps"),
+      tbodyOps: $("#tbodyOps"),
+      tVentaOps: $("#tVentaOps"),
+      tCostoOps: $("#tCostoOps"),
+      tRentOps: $("#tRentOps"),
+
+      addFormGastos: $("#addFormGastos"),
+      gFecha: $("#gFecha"),
+      gCategoria: $("#gCategoria"),
+      gDesc: $("#gDesc"),
+      gMonto: $("#gMonto"),
+      searchGastos: $("#searchGastos"),
+      btnClearGastos: $("#btnClearGastos"),
+      dayGastos: $("#dayGastos"),
+      btnClearDayGastos: $("#btnClearDayGastos"),
+      tbodyGastos: $("#tbodyGastos"),
+      tGastos: $("#tGastos"),
+
+      resVentas: $("#resVentas"),
+      resBruta: $("#resBruta"),
+      resGastos: $("#resGastos"),
+      resNeta: $("#resNeta"),
+      resMeta: $("#resMeta"),
+      resVentaRow: $("#resVentaRow"),
+      resCostoRow: $("#resCostoRow"),
+      resRentRow: $("#resRentRow"),
+      resGastosRow: $("#resGastosRow"),
+      resNetoRow: $("#resNetoRow"),
+
+      chartScale: $("#chartScale"),
+      trackGastos: $("#trackGastos"),
+      trackNeta: $("#trackNeta"),
+      barGastos: $("#barGastos"),
+      barNetaNeg: $("#barNetaNeg"),
+      barNetaPos: $("#barNetaPos"),
+      valGastos: $("#valGastos"),
+      valNeta: $("#valNeta"),
+
+      cntTotalOps: $("#cntTotalOps"),
+      cntTubosPH: $("#cntTubosPH"),
+      cntTop: $("#cntTop"),
+      cntTopHint: $("#cntTopHint"),
+      cntVAO: $("#cntVAO"),
+      cntCONVERSION: $("#cntCONVERSION"),
+      cntSERVICE: $("#cntSERVICE"),
+      cntOTRO: $("#cntOTRO"),
+      tbodyConteo: $("#tbodyConteo"),
+      tConteo: $("#tConteo"),
+      btnExport: $("#btnExport"),
+      btnBackup: $("#btnBackup"),
+      btnImport: $("#btnImport"),
+      fileImport: $("#fileImport"),
+      btnAdmin: $("#btnAdmin"),
     };
 
-    const defaultTalleres = [
-      { id: "minuto-gnc", nombre: "Minuto GNC", vuelta: 1, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "calera-torres-gnc", nombre: "Calera Torres", vuelta: 1, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "silvana-calera", nombre: "Calera Silvana", vuelta: 1, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "zico", nombre: "Zico", vuelta: 1, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "colon-gnc", nombre: "Colón GNC", vuelta: 1, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "tabach-gnc", nombre: "Tabach GNC", vuelta: 1, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "franco-alta-gracia", nombre: "Franco Alta Gracia", vuelta: 1, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "servincor", nombre: "Servincor", vuelta: 1, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "bruno-f", nombre: "Bruno F", vuelta: 1, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "porto-alta-gracia", nombre: "Porto Alta Gracia", vuelta: 1, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "brochero-gnc", nombre: "Brochero GNC", vuelta: 1, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "valparaiso-gnc", nombre: "Valparaíso GNC", vuelta: 1, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-
-      { id: "canovas", nombre: "Cánovas", vuelta: 2, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "malvinas-gnc", nombre: "Malvinas GNC", vuelta: 2, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "genesis-gnc", nombre: "Génesis GNC", vuelta: 2, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "alem", nombre: "ALEM", vuelta: 2, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "cars", nombre: "Cars", vuelta: 2, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "forteza-gnc", nombre: "Forteza GNC", vuelta: 2, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "enero-gas", nombre: "Enero Gas", vuelta: 2, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "pepe", nombre: "Pepe", vuelta: 2, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-
-      { id: "san-francisco-gnc", nombre: "Sola", vuelta: 3, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "Santa-rosa", nombre: "Maidana - Santa Rosa de Calamuchita", vuelta: 3, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "Oncativo", nombre: "Biondini - Oncativo", vuelta: 3, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "otros-v3", nombre: "Otros", vuelta: 3, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "genovesio", nombre: "Genovesio - TTE EL GRINGO - RINCON 1450", vuelta: 3, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "gnc-giordano", nombre: "GNC Giordano - TTE MICROCARGAS - F.FRIAS 924", vuelta: 3, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "tecno-gnc", nombre: "Tecno GNC", vuelta: 3, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "marcos-gnc", nombre: "Marcos GNC", vuelta: 3, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "franco-cba", nombre: "Franco cba", vuelta: 3, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "franc-villa-dolores", nombre: "Franc Villa Dolores", vuelta: 3, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "leal", nombre: "Leal", vuelta: 3, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "misiti", nombre: "Misiti", vuelta: 3, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "enjom", nombre: "Enjom", vuelta: 3, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "alemanes", nombre: "Alemanes", vuelta: 3, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "acosta", nombre: "Rosso - TTE MICROCARGAS - F.FRIAS 924", vuelta: 3, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" },
-      { id: "ceriani", nombre: "CERIANI", vuelta: 3, cantidad: 0, sinValvulaAll:false, obs: "", fletero:"", estado:"retiro" }
-    ];
-
-    const tbodyV1 = document.getElementById("tbody-v1");
-    const tbodyV2 = document.getElementById("tbody-v2");
-    const tbodyV3 = document.getElementById("tbody-v3");
-    const tbodyEstado = document.getElementById("tbody-estado");
-
-    const cilTotalGeneralEl = document.getElementById("cil-total-general");
-    const cilV1ResumenEl = document.getElementById("cil-v1");
-    const cilV2ResumenEl = document.getElementById("cil-v2");
-    const cilV3ResumenEl = document.getElementById("cil-v3");
-
-    const cilV1CardEl = document.getElementById("cil-v1-card");
-    const cilV2CardEl = document.getElementById("cil-v2-card");
-    const cilV3CardEl = document.getElementById("cil-v3-card");
-
-    const btnReset = document.getElementById("btn-reset");
-
-    const estadoRetiroCountEl = document.getElementById("estado-retiro-count");
-    const estadoProcesoCountEl = document.getElementById("estado-proceso-count");
-    const estadoListoCountEl = document.getElementById("estado-listo-count");
-    const estadoEntregadoCountEl = document.getElementById("estado-entregado-count");
-    const estadoFiltroFletero = document.getElementById("estado-filtro-fletero");
-    const btnEstadoTodosProceso = document.getElementById("btn-estado-todos-proceso");
-    const btnEstadoTodosListo = document.getElementById("btn-estado-todos-listo");
-    const btnEstadoTodosEntregado = document.getElementById("btn-estado-todos-entregado");
-
-    const btnValvChecklist = document.getElementById("btn-valv-checklist");
-    const tbodyValvChecklist = document.getElementById("tbody-valv-checklist");
-    const tbodyValvSin = document.getElementById("tbody-valv-sin");
-    const valvResponsableInp = document.getElementById("valv-responsable");
-    const valvFechaEl = document.getElementById("valv-fecha");
-    const valvCilEl = document.getElementById("valv-cil");
-    const valvSinEl = document.getElementById("valv-sin");
-    const valvEspEl = document.getElementById("valv-esp");
-
-    const ordenOverlay = document.getElementById("orden-overlay");
-    const ordenFleteroNombreEl = document.getElementById("orden-fletero-nombre");
-    const ordenTbodyEl = document.getElementById("orden-tbody");
-    const ordenCerrarBtn = document.getElementById("orden-cerrar");
-    const ordenImprimirBtn = document.getElementById("orden-imprimir");
-
-    let talleres = [];
-    let panelItems = [];
-    let filtroFletero = "todos";
-
-    async function actualizarCantidad(id, valor){
-      let n = parseInt(valor, 10);
-      if(isNaN(n) || n < 0) n = 0;
-      const ref = doc(colTalleres, id);
-      await updateDoc(ref, { cantidad: n });
-    }
-
-    async function actualizarSinValvulaAll(id, valor){
-      const ref = doc(colTalleres, id);
-      await updateDoc(ref, { sinValvulaAll: !!valor });
-    }
-
-    async function actualizarNombre(id, nombre){
-      const ref = doc(colTalleres, id);
-      await updateDoc(ref, { nombre: (nombre || "").trim() });
-    }
-
-    async function actualizarObs(id, texto){
-      const ref = doc(colTalleres, id);
-      await updateDoc(ref, { obs: texto });
-    }
-
-    async function actualizarFletero(id, fletero){
-      const ref = doc(colTalleres, id);
-      await updateDoc(ref, { fletero: fletero });
-    }
-
-    async function actualizarEstado(id, estado){
-      const ref = doc(colTalleres, id);
-      await updateDoc(ref, { estado: estado });
-    }
-
-    async function reiniciarDia(){
-      const ok = confirm("¿Reiniciar TODOS los datos de hoy? (cantidades, sin válvula, fletero, observaciones, estado)?");
-      if(!ok) return;
-      const snap = await getDocs(colTalleres);
-      const batch = writeBatch(db);
-      snap.forEach(d => {
-        batch.update(d.ref, {
-          cantidad: 0,
-          sinValvulaAll: false,
-          obs: "",
-          fletero: "",
-          estado: "retiro"
-        });
-      });
-      await batch.commit();
-    }
-
-    function renderVuelta(vuelta, tbody){
-      tbody.innerHTML = "";
-      const lista = talleres
-        .filter(t => t.vuelta === vuelta)
-        .sort((a,b) => {
-          const oa = ordenManual[a.id] ?? 9999;
-          const ob = ordenManual[b.id] ?? 9999;
-          if(oa !== ob) return oa - ob;
-          return a.nombre.localeCompare(b.nombre,"es");
-        });
-
-      lista.forEach(t => {
-        const cant = Number(t.cantidad) || 0;
-        const fleteroVal = t.fletero || "";
-        const sinAll = !!t.sinValvulaAll;
-
-        const tr = document.createElement("tr");
-        tr.dataset.id = t.id;
-        if(cant > 0) tr.classList.add("tiene");
-
-        const tdTaller = document.createElement("td");
-        tdTaller.className = "col-taller";
-
-        if(t.id === "otros-v3"){
-          const inpNom = document.createElement("input");
-          inpNom.type = "text";
-          inpNom.className = "input-text";
-          inpNom.placeholder = "Otros (escribí taller)";
-          inpNom.value = (t.nombre && t.nombre !== "Otros") ? t.nombre : "";
-          inpNom.addEventListener("blur", () => actualizarNombre(t.id, inpNom.value));
-          inpNom.addEventListener("keydown", (e) => { if(e.key === "Enter") inpNom.blur(); });
-          tdTaller.appendChild(inpNom);
-        }else{
-          tdTaller.textContent = t.nombre;
-        }
-
-        tr.appendChild(tdTaller);
-
-        const tdFlet = document.createElement("td");
-        tdFlet.className = "col-fletero";
-        const selF = document.createElement("select");
-        selF.className = "select-fletero";
-        selF.innerHTML = `
-          <option value="">-</option>
-          <option value="Agustin">Agustín</option>
-          <option value="Jorge">Jorge</option>
-          <option value="Rodrigo">Rodrigo</option>
-          <option value="Joaquin">Joaquín</option>
-        `;
-        selF.value = fleteroVal || "";
-        tdFlet.appendChild(selF);
-        tr.appendChild(tdFlet);
-
-        const tdCant = document.createElement("td");
-        tdCant.className = "col-cant";
-        const inpCant = document.createElement("input");
-        inpCant.type = "number";
-        inpCant.min = "0";
-        inpCant.step = "1";
-        inpCant.className = "input-num";
-        inpCant.value = cant > 0 ? cant : "";
-        tdCant.appendChild(inpCant);
-        tr.appendChild(tdCant);
-
-        const tdSin = document.createElement("td");
-        tdSin.className = "col-cant";
-        const chkSin = document.createElement("input");
-        chkSin.type = "checkbox";
-        chkSin.checked = sinAll;
-        chkSin.title = "Si está tildado: a este taller le devolvemos válvulas (todas sus PH del día).";
-        tdSin.appendChild(chkSin);
-        tr.appendChild(tdSin);
-
-        const tdObs = document.createElement("td");
-        tdObs.className = "col-obs";
-        const inpObs = document.createElement("input");
-        inpObs.type = "text";
-        inpObs.className = "input-text";
-        inpObs.value = t.obs || "";
-        tdObs.appendChild(inpObs);
-        tr.appendChild(tdObs);
-
-        selF.addEventListener("change", () => actualizarFletero(t.id, selF.value));
-
-        chkSin.addEventListener("change", () => actualizarSinValvulaAll(t.id, chkSin.checked));
-
-        inpCant.addEventListener("blur", () => actualizarCantidad(t.id, inpCant.value));
-        inpCant.addEventListener("keydown", (e) => { if(e.key === "Enter") inpCant.blur(); });
-
-        inpObs.addEventListener("blur", () => actualizarObs(t.id, inpObs.value.trim()));
-
-        tbody.appendChild(tr);
-      });
-    }
-
-    function pesoEstado(e){
-      const x = (e || "retiro").toLowerCase();
-      if(x === "retiro") return 1;
-      if(x === "proceso") return 2;
-      if(x === "listo") return 3;
-      if(x === "entregado") return 4;
-      return 5;
-    }
-
-    function renderEstado(){
-      if(!tbodyEstado) return;
-      tbodyEstado.innerHTML = "";
-
-      let lista = talleres.filter(t => (Number(t.cantidad) || 0) > 0);
-
-      if(filtroFletero !== "todos"){
-        lista = lista.filter(t => (t.fletero || "") === filtroFletero);
+    const fmtARS = (n) => {
+      const v = Number(n || 0);
+      try {
+        return new Intl.NumberFormat("es-AR", { style:"currency", currency:"ARS", maximumFractionDigits:0 }).format(v);
+      } catch {
+        return "ARS " + Math.round(v).toString();
       }
-
-      lista.sort((a,b) => {
-        const pa = pesoEstado(a.estado || "retiro");
-        const pb = pesoEstado(b.estado || "retiro");
-        if(pa !== pb) return pa - pb;
-        if(a.vuelta !== b.vuelta) return a.vuelta - b.vuelta;
-        const oa = ordenManual[a.id] ?? 9999;
-        const ob = ordenManual[b.id] ?? 9999;
-        if(oa !== ob) return oa - ob;
-        return a.nombre.localeCompare(b.nombre,"es");
-      });
-
-      let retiroCount = 0, procesoCount = 0, listoCount = 0, entregadoCount = 0;
-      lista.forEach(t => {
-        const c = Number(t.cantidad) || 0;
-        const e = (t.estado || "retiro").toLowerCase();
-        if(e === "proceso") procesoCount += c;
-        else if(e === "listo") listoCount += c;
-        else if(e === "entregado") entregadoCount += c;
-        else retiroCount += c;
-      });
-
-      if(estadoRetiroCountEl) estadoRetiroCountEl.textContent = retiroCount;
-      if(estadoProcesoCountEl) estadoProcesoCountEl.textContent = procesoCount;
-      if(estadoListoCountEl) estadoListoCountEl.textContent = listoCount;
-      if(estadoEntregadoCountEl) estadoEntregadoCountEl.textContent = entregadoCount;
-
-      lista.forEach(t => {
-        const c = Number(t.cantidad) || 0;
-        const fle = t.fletero || "";
-        const estadoVal = (t.estado || "retiro").toLowerCase();
-
-        const tr = document.createElement("tr");
-        if(estadoVal === "proceso") tr.classList.add("estado-proceso");
-        else if(estadoVal === "listo") tr.classList.add("estado-listo");
-        else if(estadoVal === "entregado") tr.classList.add("estado-entregado");
-        else tr.classList.add("estado-retiro");
-
-        const tdTaller = document.createElement("td");
-        tdTaller.textContent = t.nombre;
-        tr.appendChild(tdTaller);
-
-        const tdVuelta = document.createElement("td");
-        tdVuelta.textContent = "V" + (t.vuelta || "?");
-        tr.appendChild(tdVuelta);
-
-        const tdCant = document.createElement("td");
-        tdCant.textContent = c;
-        tr.appendChild(tdCant);
-
-        const tdFle = document.createElement("td");
-        tdFle.textContent = fle || "-";
-        tr.appendChild(tdFle);
-
-        const tdEstado = document.createElement("td");
-        const selEstado = document.createElement("select");
-        selEstado.className = "select-estado";
-        selEstado.innerHTML = `
-          <option value="retiro">En retiro</option>
-          <option value="proceso">Proceso</option>
-          <option value="listo">Listo</option>
-          <option value="entregado">Entregado</option>
-        `;
-        selEstado.value = estadoVal;
-        selEstado.addEventListener("change", () => actualizarEstado(t.id, selEstado.value));
-        tdEstado.appendChild(selEstado);
-        tr.appendChild(tdEstado);
-
-        tbodyEstado.appendChild(tr);
-      });
-    }
-
-    function calcularValvulasEsperadasPorTaller(t){
-      const cant = Number(t.cantidad) || 0;
-      if(t.sinValvulaAll) return 0;
-      return cant;
-    }
-
-    function renderValvulasResumen(){
-      const cil = talleres.reduce((acc,t)=> acc + (Number(t.cantidad)||0), 0);
-      const sinCount = talleres.filter(t => (Number(t.cantidad)||0) > 0 && !!t.sinValvulaAll).length;
-      const esp = talleres.reduce((acc,t)=> acc + calcularValvulasEsperadasPorTaller(t), 0);
-
-      if(valvCilEl) valvCilEl.textContent = cil;
-      if(valvSinEl) valvSinEl.textContent = sinCount;
-      if(valvEspEl) valvEspEl.textContent = esp;
-    }
-
-    function renderValvulasSin(){
-      if(!tbodyValvSin) return;
-      tbodyValvSin.innerHTML = "";
-
-      const lista = talleres
-        .filter(t => (Number(t.cantidad) || 0) > 0)
-        .filter(t => !!t.sinValvulaAll)
-        .sort((a,b) => {
-          if(a.vuelta !== b.vuelta) return a.vuelta - b.vuelta;
-          const oa = ordenManual[a.id] ?? 9999;
-          const ob = ordenManual[b.id] ?? 9999;
-          if(oa !== ob) return oa - ob;
-          return a.nombre.localeCompare(b.nombre,"es");
-        });
-
-      lista.forEach((t, idx) => {
-        const tr = document.createElement("tr");
-
-        const tdN = document.createElement("td");
-        tdN.textContent = idx + 1;
-        tr.appendChild(tdN);
-
-        const tdV = document.createElement("td");
-        tdV.textContent = "V" + (t.vuelta || "?");
-        tr.appendChild(tdV);
-
-        const tdT = document.createElement("td");
-        tdT.textContent = t.nombre;
-        tr.appendChild(tdT);
-
-        const tdC = document.createElement("td");
-        tdC.style.textAlign = "right";
-        tdC.textContent = Number(t.cantidad) || 0;
-        tr.appendChild(tdC);
-
-        const tdO = document.createElement("td");
-        tdO.textContent = t.obs || "";
-        tr.appendChild(tdO);
-
-        tbodyValvSin.appendChild(tr);
-      });
-    }
-
-    function renderValvulasChecklist(){
-      if(!tbodyValvChecklist) return;
-      tbodyValvChecklist.innerHTML = "";
-
-      const lista = talleres
-        .filter(t => (Number(t.cantidad) || 0) > 0)
-        .map(t => ({ ...t, valvulas: calcularValvulasEsperadasPorTaller(t) }))
-        .filter(t => t.valvulas > 0)
-        .sort((a,b) => {
-          if(a.vuelta !== b.vuelta) return a.vuelta - b.vuelta;
-          const oa = ordenManual[a.id] ?? 9999;
-          const ob = ordenManual[b.id] ?? 9999;
-          if(oa !== ob) return oa - ob;
-          return a.nombre.localeCompare(b.nombre,"es");
-        });
-
-      lista.forEach((t, idx) => {
-        const tr = document.createElement("tr");
-
-        const tdN = document.createElement("td");
-        tdN.textContent = idx + 1;
-        tr.appendChild(tdN);
-
-        const tdV = document.createElement("td");
-        tdV.textContent = "V" + (t.vuelta || "?");
-        tr.appendChild(tdV);
-
-        const tdT = document.createElement("td");
-        tdT.textContent = t.nombre;
-        tr.appendChild(tdT);
-
-        const tdC = document.createElement("td");
-        tdC.style.textAlign = "right";
-        tdC.textContent = t.valvulas;
-        tr.appendChild(tdC);
-
-        const tdR = document.createElement("td");
-        tdR.innerHTML = `<span style="font-size:18px;">☐</span>`;
-        tr.appendChild(tdR);
-
-        const tdO = document.createElement("td");
-        tdO.textContent = t.obs || "";
-        tr.appendChild(tdO);
-
-        tbodyValvChecklist.appendChild(tr);
-      });
-    }
-
-    function render(){
-      renderVuelta(1, tbodyV1);
-      renderVuelta(2, tbodyV2);
-      renderVuelta(3, tbodyV3);
-      renderEstado();
-
-      let total = 0, v1 = 0, v2 = 0, v3 = 0;
-
-      talleres.forEach(t => {
-        const c = Number(t.cantidad) || 0;
-        total += c;
-        if(t.vuelta === 1) v1 += c;
-        else if(t.vuelta === 2) v2 += c;
-        else if(t.vuelta === 3) v3 += c;
-      });
-
-      cilTotalGeneralEl.textContent = total;
-      cilV1ResumenEl.textContent = v1;
-      cilV2ResumenEl.textContent = v2;
-      cilV3ResumenEl.textContent = v3;
-
-      cilV1CardEl.textContent = v1;
-      cilV2CardEl.textContent = v2;
-      cilV3CardEl.textContent = v3;
-
-      renderValvulasResumen();
-      renderValvulasSin();
-      renderValvulasChecklist();
-    }
-
-    async function cambiarEstadoMasivo(nuevoEstado){
-      const candidatos = talleres.filter(t => {
-        const c = Number(t.cantidad) || 0;
-        if(c <= 0) return false;
-        if(filtroFletero === "todos") return true;
-        return (t.fletero || "") === filtroFletero;
-      });
-
-      if(candidatos.length === 0){
-        alert("No hay talleres con cilindros para actualizar en este filtro.");
-        return;
-      }
-
-      const ok = confirm(`Pasar ${candidatos.length} taller(es) a estado "${nuevoEstado.toUpperCase()}"?`);
-      if(!ok) return;
-
-      const batch = writeBatch(db);
-      candidatos.forEach(t => {
-        const ref = doc(colTalleres, t.id);
-        batch.update(ref, { estado: nuevoEstado });
-      });
-      await batch.commit();
-    }
-
-    function renderOrdenPanel(){
-      ordenTbodyEl.innerHTML = "";
-      panelItems.forEach((item, idx) => {
-        const tr = document.createElement("tr");
-
-        const tdNum = document.createElement("td");
-        tdNum.className = "orden-col-num";
-        tdNum.textContent = idx + 1;
-        tr.appendChild(tdNum);
-
-        const tdVuelta = document.createElement("td");
-        tdVuelta.className = "orden-col-vuelta";
-        tdVuelta.textContent = "V" + (item.vuelta || "?");
-        tr.appendChild(tdVuelta);
-
-        const tdTaller = document.createElement("td");
-        tdTaller.textContent = item.taller || "";
-        tr.appendChild(tdTaller);
-
-        const tdCant = document.createElement("td");
-        tdCant.className = "orden-col-cant";
-        tdCant.textContent = item.cantidad ?? "";
-        tr.appendChild(tdCant);
-
-        const tdObs = document.createElement("td");
-        tdObs.textContent = item.obs || "";
-        tr.appendChild(tdObs);
-
-        const tdAcc = document.createElement("td");
-        tdAcc.className = "orden-col-acciones";
-        const btnUp = document.createElement("button");
-        btnUp.textContent = "↑";
-        btnUp.className = "orden-btn-small";
-        btnUp.addEventListener("click", () => moverOrden(idx, -1));
-        const btnDown = document.createElement("button");
-        btnDown.textContent = "↓";
-        btnDown.className = "orden-btn-small";
-        btnDown.addEventListener("click", () => moverOrden(idx, 1));
-        tdAcc.appendChild(btnUp);
-        tdAcc.appendChild(btnDown);
-        tr.appendChild(tdAcc);
-
-        ordenTbodyEl.appendChild(tr);
-      });
-    }
-
-    function moverOrden(index, dir){
-      const nuevo = index + dir;
-      if(nuevo < 0 || nuevo >= panelItems.length) return;
-      const temp = panelItems[index];
-      panelItems[index] = panelItems[nuevo];
-      panelItems[nuevo] = temp;
-      renderOrdenPanel();
-    }
-
-    function abrirOrdenFletero(fleteroClave){
-      const fleLower = fleteroClave.toLowerCase();
-      const candidatos = talleres.filter(t => (t.fletero || "").toLowerCase() === fleLower);
-
-      const seleccion = [];
-      candidatos.forEach(t => {
-        let cantidad = Number(t.cantidad) || 0;
-        let obs = t.obs || "";
-
-        const fila = document.querySelector('tr[data-id="' + t.id + '"]');
-        if(fila){
-          const inpCant = fila.querySelectorAll('.input-num')[0]; // cantidad
-          const inpObs = fila.querySelector('.input-text');
-          if(inpCant){
-            const v = parseInt(inpCant.value, 10);
-            if(!isNaN(v) && v >= 0) cantidad = v;
-          }
-          if(inpObs){
-            obs = inpObs.value || "";
-          }
-        }
-
-        if(cantidad > 0 || (obs && obs.trim() !== "")){
-          seleccion.push({
-            taller: t.nombre,
-            vuelta: t.vuelta,
-            cantidad,
-            obs
-          });
-        }
-      });
-
-      if(seleccion.length === 0){
-        alert("No hay talleres asignados a " + fleteroClave + " con cilindros u observaciones para imprimir.");
-        return;
-      }
-
-      panelItems = seleccion;
-      ordenFleteroNombreEl.textContent = "Fletero " + fleteroClave;
-      renderOrdenPanel();
-
-      ordenOverlay.style.display = "flex";
-      document.body.classList.add("orden-open");
-    }
-
-    function cerrarOrden(){
-      ordenOverlay.style.display = "none";
-      document.body.classList.remove("orden-open");
-    }
-
-    function initBotonesFletero(){
-      const botones = document.querySelectorAll(".btn-print-fletero");
-      botones.forEach(btn => {
-        btn.addEventListener("click", (e) => {
-          e.preventDefault();
-          const fle = btn.getAttribute("data-fletero");
-          if(!fle) return;
-          abrirOrdenFletero(fle);
-        });
-      });
-    }
-
-    function initCollapsibles(){
-      const cards = document.querySelectorAll(".vuelta-card");
-      cards.forEach(card => {
-        const header = card.querySelector(".vuelta-header");
-        const icon = card.querySelector(".toggle-icon");
-        if(!header) return;
-
-        header.addEventListener("click", (e) => {
-          if(e.target.closest("button")) return;
-          const isCollapsed = card.classList.toggle("collapsed");
-          if(icon) icon.textContent = isCollapsed ? "►" : "▼";
-        });
-      });
-    }
-
-    function switchToTab(tab){
-      const tabButtons = document.querySelectorAll(".tab-btn[data-tab]");
-      const tabPanels = document.querySelectorAll(".tab-panel");
-      tabButtons.forEach(btn => btn.classList.toggle("active", btn.dataset.tab === tab));
-      tabPanels.forEach(p => p.classList.toggle("active", p.id === ("tab-" + tab)));
-    }
-
-    function initTabs(){
-      const tabButtons = document.querySelectorAll(".tab-btn[data-tab]");
-      tabButtons.forEach(btn => {
-        btn.addEventListener("click", () => switchToTab(btn.dataset.tab));
-      });
-    }
-
-    function formatFechaAR(d){
-      const dd = String(d.getDate()).padStart(2,"0");
-      const mm = String(d.getMonth()+1).padStart(2,"0");
+    };
+    const fmtPct = (x) => ((Number(x || 0) * 100).toFixed(2) + "%");
+
+    const clampText = (s) => (s ?? "").toString().trim();
+    const toNumber = (x) => {
+      const v = Number((x ?? "0").toString().replace(",", "."));
+      return Number.isFinite(v) ? v : 0;
+    };
+
+    const clampTubos = (x) => {
+      let n = Math.round(toNumber(x));
+      if (!Number.isFinite(n)) n = 1;
+      if (n < 1) n = 1;
+      if (n > 5) n = 5;
+      return n;
+    };
+
+    const todayISO = () => {
+      const d = new Date();
       const yyyy = d.getFullYear();
-      return dd + "/" + mm + "/" + yyyy;
-    }
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    };
+    const currentMonth = () => todayISO().slice(0,7);
+    const monthOf = (dateStr) => (clampText(dateStr).length >= 7 ? clampText(dateStr).slice(0,7) : "");
 
-    function initImpresionValvulas(){
-      if(valvResponsableInp){
-        const saved = localStorage.getItem("crpc_valv_responsable") || "";
-        valvResponsableInp.value = saved;
-        valvResponsableInp.addEventListener("blur", () => {
-          localStorage.setItem("crpc_valv_responsable", (valvResponsableInp.value || "").trim());
-        });
-      }
+    const escapeAttr = (s) =>
+      (s ?? "").toString()
+        .replaceAll("&","&amp;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;");
 
-      if(valvFechaEl){
-        valvFechaEl.textContent = formatFechaAR(new Date());
-      }
+    const calcRent = (venta, costo) => toNumber(venta) - toNumber(costo);
 
-      if(!btnValvChecklist) return;
+    // Estado de la app (datos vienen del RTDB para el mes activo)
+    let state = {
+      ops: [],
+      gastos: [],
+      activeTab: "ops",
+      month: currentMonth()
+    };
 
-      // Limpieza al terminar de imprimir
-      window.addEventListener("afterprint", () => {
-        document.body.classList.remove("print-valvulas");
-        // Restaurar nombre en pantalla (no se imprime)
-        if(valvResponsableInp){
-          const saved = localStorage.getItem("crpc_valv_responsable") || "";
-          valvResponsableInp.value = saved;
-        }
+    // -------- RTDB Paths --------
+    const monthBase = (m) => `rentabilidad/${EMPRESA_ID}/months/${m}`;
+    const opsBase = (m) => `${monthBase(m)}/ops`;
+    const gastosBase = (m) => `${monthBase(m)}/gastos`;
+
+    let listeners = { opsRef: null, gastosRef: null };
+    let authReady = false;
+
+    const initAnon = async () => {
+      await signInAnonymously(AUTH);
+      return new Promise((resolve) => {
+        onAuthStateChanged(AUTH, (u) => { if (u) resolve(u); });
+      });
+    };
+
+    const attachMonthListeners = (m) => {
+      // cortar listeners previos
+      if (listeners.opsRef) off(listeners.opsRef);
+      if (listeners.gastosRef) off(listeners.gastosRef);
+
+      const rOps = ref(DB, opsBase(m));
+      const rG = ref(DB, gastosBase(m));
+
+      listeners.opsRef = rOps;
+      listeners.gastosRef = rG;
+
+      onValue(rOps, (snap) => {
+        const v = snap.val() || {};
+        const rows = Object.entries(v).map(([id, data]) => ({
+          id,
+          fecha: data.fecha || "",
+          servicio: SERVICE_OPTIONS.includes(data.servicio) ? data.servicio : "OTRO",
+          dominio: data.dominio || "",
+          desc: data.desc || "",
+          venta: toNumber(data.venta),
+          costo: toNumber(data.costo),
+          tubos: (data.tubos==null ? 1 : clampTubos(data.tubos)),
+          updatedAt: toNumber(data.updatedAt)
+        }));
+        rows.sort((a,b) => (a.fecha||"").localeCompare(b.fecha||"") || (a.updatedAt||0)-(b.updatedAt||0));
+        state.ops = rows;
+        renderAll(false);
       });
 
-      btnValvChecklist.addEventListener("click", (e) => {
-        e.preventDefault();
-
-        if(valvResponsableInp){
-          localStorage.setItem("crpc_valv_responsable", (valvResponsableInp.value || "").trim());
-        }
-
-        // Genera checklist con datos actuales
-        renderValvulasResumen();
-        renderValvulasSin();
-        renderValvulasChecklist();
-
-        // Asegura que se vea la pestaña de válvulas
-        switchToTab("valvulas");
-
-        // Solo imprimir esta pestaña
-        document.body.classList.add("print-valvulas");
-
-        // Fecha (se imprime)
-        if(valvFechaEl){
-          valvFechaEl.textContent = formatFechaAR(new Date());
-        }
-
-        // En impresión, el campo "Controló" debe salir en blanco para completar a mano
-        if(valvResponsableInp){
-          valvResponsableInp.value = "";
-        }
-
-        window.print();
+      onValue(rG, (snap) => {
+        const v = snap.val() || {};
+        const rows = Object.entries(v).map(([id, data]) => ({
+          id,
+          fecha: data.fecha || "",
+          categoria: GASTO_CATS.includes(data.categoria) ? data.categoria : "OTRO",
+          desc: data.desc || "",
+          monto: toNumber(data.monto),
+          updatedAt: toNumber(data.updatedAt)
+        }));
+        rows.sort((a,b) => (a.fecha||"").localeCompare(b.fecha||"") || (a.updatedAt||0)-(b.updatedAt||0));
+        state.gastos = rows;
+        renderAll(false);
       });
-    }
+    };
 
-    
-    // ---- MANTENIMIENTO CRPC (UI + FIRESTORE) ----
-    const tbodyMant = document.getElementById("tbody-mant");
-    const btnPrintMant = document.getElementById("btn-print-mant");
-    let mantenimiento = [];
-
-    function renderMantenimiento(){
-      if(!tbodyMant) return;
-      tbodyMant.innerHTML = "";
-      const lista = (mantenimiento || []).slice().sort((a,b)=> (a.equipo||"").localeCompare((b.equipo||""),"es"));
-      lista.forEach(item => {
-        const tr = document.createElement("tr");
-
-        const tdEq = document.createElement("td");
-        tdEq.textContent = item.equipo || "";
-        tr.appendChild(tdEq);
-
-        const tdFe = document.createElement("td");
-        const inpFe = document.createElement("input");
-        inpFe.type = "date";
-        inpFe.className = "input-text";
-        inpFe.value = item.fecha || "";
-        inpFe.addEventListener("blur", async () => {
-          try{
-            await setDoc(doc(colTalleres, MANT_PREFIX + item.id), { equipo:item.equipo, fecha: inpFe.value || "" }, { merge:true });
-          }catch(e){ console.error("MANT FECHA ERROR:", e); }
-        });
-        inpFe.addEventListener("keydown", (e) => { if(e.key === "Enter") inpFe.blur(); });
-        tdFe.appendChild(inpFe);
-        tr.appendChild(tdFe);
-
-        const tdObs = document.createElement("td");
-        const inpObs = document.createElement("input");
-        inpObs.type = "text";
-        inpObs.className = "input-text";
-        inpObs.placeholder = "Notas / detalle";
-        inpObs.value = item.obs || "";
-        inpObs.addEventListener("blur", async () => {
-          try{
-            await setDoc(doc(colTalleres, MANT_PREFIX + item.id), { equipo:item.equipo, obs: (inpObs.value||"").trim() }, { merge:true });
-          }catch(e){ console.error("MANT OBS ERROR:", e); }
-        });
-        inpObs.addEventListener("keydown", (e) => { if(e.key === "Enter") inpObs.blur(); });
-        tdObs.appendChild(inpObs);
-        tr.appendChild(tdObs);
-
-        tbodyMant.appendChild(tr);
-      });
-    }
-
-    function initImpresionMantenimiento(){
-      if(!btnPrintMant) return;
-      const escapeHtml = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-      btnPrintMant.addEventListener("click", () => {
-        const rows = (mantenimiento||[]).slice()
-          .sort((a,b)=> (a.equipo||"").localeCompare((b.equipo||""),"es"))
-          .map(it => `<tr><td>${escapeHtml(it.equipo||"")}</td><td>${escapeHtml(it.fecha||"")}</td><td>${escapeHtml(it.obs||"")}</td></tr>`).join("");
-        const htmlPrint = `<!doctype html><html><head><meta charset="utf-8"><title>Mantenimiento CRPC</title>
-          <style>
-            body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:24px;color:#111}
-            h1{margin:0 0 12px 0;font-size:18px}
-            table{width:100%;border-collapse:collapse}
-            th,td{border:1px solid #ccc;padding:8px;font-size:12px;vertical-align:top}
-            th{background:#f3f3f3;text-align:left}
-            .small{color:#555;font-size:11px;margin-bottom:10px}
-          </style></head><body>
-          <h1>Mantenimiento CRPC</h1>
-          <div class="small">Fecha impresión: ${new Date().toLocaleString("es-AR")}</div>
-          <table><thead><tr><th>Equipo</th><th>Último control</th><th>Observaciones</th></tr></thead><tbody>${rows}</tbody></table>
-        </body></html>`;
-        const w = window.open("", "_blank");
-        if(!w) return;
-        w.document.open();
-        w.document.write(htmlPrint);
-        w.document.close();
-        w.focus();
-        w.print();
-      });
-    }
-
-    async function initMantenimientoFirestore(){
-      try{
-        const sm = await getDocs(colTalleres);
-        const existingIds = new Set(sm.docs.map(d=>d.id));
-        for(const it of defaultMantenimiento){
-          const docId = MANT_PREFIX + it.id;
-          if(!existingIds.has(docId)){
-            await setDoc(doc(colTalleres, docId), { equipo: it.equipo, fecha: it.fecha, obs: it.obs }, { merge:true });
-          }
-        }
-        onSnapshot(colTalleres, (s) => {
-          const arr = [];
-          s.forEach(d => {
-            if(!(d.id && d.id.startsWith(MANT_PREFIX))) return;
-            const data = d.data() || {};
-            arr.push({ id: d.id.replace(MANT_PREFIX,""), equipo: data.equipo || "", fecha: data.fecha || "", obs: data.obs || "" });
-          });
-          mantenimiento = arr;
-          renderMantenimiento();
-        });
-      }catch(e){
-        console.error("MANT INIT ERROR:", e);
+    // -------- Cálculos --------
+    const totalsOps = (arr) => {
+      let venta=0, costo=0, rent=0;
+      for (const r of arr){
+        const v = toNumber(r.venta), c = toNumber(r.costo);
+        venta += v; costo += c; rent += (v - c);
       }
-    }
+      return { venta, costo, rent };
+    };
+    const totalGastos = (arr) => arr.reduce((acc,g)=> acc + toNumber(g.monto), 0);
 
-async function inicializarDatos(){
-      await initMantenimientoFirestore();
-      const snap = await getDocs(colTalleres);
-      const hasTalleres = snap.docs.some(d => !(d.id && d.id.startsWith(MANT_PREFIX)));
-      if(!hasTalleres){
-        for(const t of defaultTalleres){
-          await setDoc(doc(colTalleres, t.id), t);
-        }
-      }else{
-        // Si ya hay datos en Firestore, asegurar que existan los nuevos items de Vuelta 3
-        const requiredIds = ["otros-v3", "Santa-rosa", "Oncativo"];
-        for(const rid of requiredIds){
-          const existe = snap.docs.some(d => d.id === rid);
-          if(!existe){
-            const t = defaultTalleres.find(x => x.id === rid);
-            if(t) await setDoc(doc(colTalleres, t.id), t);
-          }
+    const getFilteredOps = () => {
+      const q = clampText(els.searchOps.value).toLowerCase();
+      const day = clampText(els.dayOps?.value);
+      let base = state.ops;
+      if (day) base = base.filter(r => r.fecha === day);
+      if (!q) return base;
+      return base.filter(r => (`${r.fecha} ${r.servicio} ${r.dominio} ${r.desc}`).toLowerCase().includes(q));
+    };
+    const getFilteredGastos = () => {
+      const q = clampText(els.searchGastos.value).toLowerCase();
+      const day = clampText(els.dayGastos?.value);
+      let base = state.gastos;
+      if (day) base = base.filter(g => g.fecha === day);
+      if (!q) return base;
+      return base.filter(g => (`${g.fecha} ${g.categoria} ${g.desc}`).toLowerCase().includes(q));
+    };
+
+    // Render throttling (evita repaints masivos)
+    let raf = 0;
+    const scheduleRender = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => { raf = 0; renderAll(false); });
+    };
+
+    const updateKPIs = () => {
+      const tOps = totalsOps(state.ops);
+      const tG = totalGastos(state.gastos);
+
+      // VAO (Mes): RENTABILIDAD total de VAO = SUMA(Venta - Costo) donde servicio == VAO
+      const vaoTotal = state.ops
+        .filter(r => r.servicio === "VAO")
+        .reduce((acc, r) => acc + (toNumber(r.venta) - toNumber(r.costo)), 0);
+
+      const neta = tOps.rent - tG;
+
+      els.kpiRentBruta.textContent = fmtARS(tOps.venta);
+      els.kpiGastos.textContent = fmtARS(tG);
+      if (els.kpiVAO) els.kpiVAO.textContent = fmtARS(vaoTotal);
+      els.kpiNeta.textContent = fmtARS(neta);
+
+      els.kpiRentBruta.classList.toggle("pos", tOps.venta >= 0);
+      els.kpiRentBruta.classList.toggle("neg", tOps.venta < 0);
+els.kpiNeta.classList.toggle("pos", neta >= 0);
+      els.kpiNeta.classList.toggle("neg", neta < 0);
+    };
+
+    const renderOps = () => {
+      const list = getFilteredOps();
+      let html = "";
+      for (const r of list){
+        const rent = calcRent(r.venta, r.costo);
+        const rentClass = rent >= 0 ? "pos" : "neg";
+        html += `
+          <tr data-id="${r.id}">
+            <td data-label="Fecha"><input class="cellInput" type="date" value="${escapeAttr(r.fecha)}" aria-label="Editar fecha" data-field="fecha"></td>
+            <td data-label="Servicio">
+              <select class="cellSelect" aria-label="Editar servicio" data-field="servicio">
+                ${SERVICE_OPTIONS.map(opt => `<option value="${opt}" ${opt===r.servicio?"selected":""}>${opt}</option>`).join("")}
+              </select>
+            </td>
+            <td data-label="Tubos" class="num">
+              <input class="cellInput num" type="number" min="1" max="5" step="1" value="${r.servicio==='PH'?escapeAttr(r.tubos||1):''}" aria-label="Editar tubos (solo PH)" data-field="tubos" ${r.servicio==='PH'?'':'disabled'} placeholder="—">
+            </td>
+            <td data-label="Dominio"><input class="cellInput" type="text" value="${escapeAttr(r.dominio)}" aria-label="Editar dominio" data-field="dominio" placeholder="ABC123"></td>
+            <td data-label="Descripción"><input class="cellInput" type="text" value="${escapeAttr(r.desc)}" aria-label="Editar descripción" data-field="desc" placeholder="Detalle"></td>
+            <td data-label="Venta" class="num"><input class="cellInput num" type="number" min="0" step="1" value="${escapeAttr(r.venta)}" aria-label="Editar venta" data-field="venta"></td>
+            <td data-label="Venta" class="num"><input class="cellInput num" type="number" min="0" step="1" value="${escapeAttr(r.costo)}" aria-label="Editar costo" data-field="costo"></td>
+            <td data-label="Rentabilidad" class="num rent ${rentClass}" aria-label="Rentabilidad calculada">${fmtARS(rent)}</td>
+            <td data-label="Acción" class="num"><button class="btn danger" type="button" data-action="delete-op" aria-label="Eliminar operación">Eliminar</button></td>
+          </tr>
+        `;
+      }
+      els.tbodyOps.innerHTML = html;
+
+      const t = totalsOps(state.ops);
+      els.tVentaOps.textContent = fmtARS(t.venta);
+      els.tCostoOps.textContent = fmtARS(t.costo);
+      els.tRentOps.textContent = fmtARS(t.rent);
+    };
+
+    const renderGastos = () => {
+      const list = getFilteredGastos();
+      let html = "";
+      for (const g of list){
+        html += `
+          <tr data-id="${g.id}">
+            <td data-label="Fecha"><input class="cellInput" type="date" value="${escapeAttr(g.fecha)}" aria-label="Editar fecha gasto" data-field="fecha"></td>
+            <td data-label="Categoría">
+              <select class="cellSelect" aria-label="Editar categoría" data-field="categoria">
+                ${GASTO_CATS.map(c => `<option value="${c}" ${c===g.categoria?"selected":""}>${c}</option>`).join("")}
+              </select>
+            </td>
+            <td data-label="Descripción"><input class="cellInput" type="text" value="${escapeAttr(g.desc)}" aria-label="Editar descripción gasto" data-field="desc" placeholder="Detalle"></td>
+            <td data-label="Monto" class="num"><input class="cellInput num" type="number" min="0" step="1" value="${escapeAttr(g.monto)}" aria-label="Editar monto gasto" data-field="monto"></td>
+            <td data-label="Acción" class="num"><button class="btn danger" type="button" data-action="delete-g" aria-label="Eliminar gasto">Eliminar</button></td>
+          </tr>
+        `;
+      }
+      els.tbodyGastos.innerHTML = html;
+      els.tGastos.textContent = fmtARS(totalGastos(state.gastos));
+    };
+
+    const renderResultado = () => {
+      const tOps = totalsOps(state.ops);
+      const tG = totalGastos(state.gastos);
+      const neta = tOps.rent - tG;
+
+      const margenNeto = tOps.venta > 0 ? (neta / tOps.venta) : 0;
+
+      els.resVentas.textContent = fmtARS(tOps.venta);
+      els.resBruta.textContent = fmtARS(tOps.rent);
+      els.resGastos.textContent = fmtARS(tG);
+      els.resNeta.textContent = fmtARS(neta);
+      els.resMeta.textContent = `Margen neto: ${fmtPct(margenNeto)}`;
+
+      els.resBruta.classList.toggle("pos", tOps.rent >= 0);
+      els.resBruta.classList.toggle("neg", tOps.rent < 0);
+      els.resNeta.classList.toggle("pos", neta >= 0);
+      els.resNeta.classList.toggle("neg", neta < 0);
+
+      els.resVentaRow.textContent = fmtARS(tOps.venta);
+      els.resCostoRow.textContent = fmtARS(tOps.costo);
+      els.resRentRow.textContent = fmtARS(tOps.rent);
+      els.resGastosRow.textContent = fmtARS(tG);
+      els.resNetoRow.textContent = fmtARS(neta);
+      els.resNetoRow.classList.toggle("pos", neta >= 0);
+      els.resNetoRow.classList.toggle("neg", neta < 0);
+
+      const scale = Math.max(1, Math.max(Math.abs(neta), Math.abs(tG)));
+      els.chartScale.textContent = `Escala: ${fmtARS(scale)}`;
+
+      const wG = Math.min(100, (Math.abs(tG) / scale) * 100);
+      els.barGastos.style.setProperty("--wblue", wG.toFixed(2) + "%");
+      els.valGastos.textContent = fmtARS(tG);
+
+      const wN = Math.min(100, (Math.abs(neta) / scale) * 100);
+      const isNeg = neta < 0;
+      els.barNetaNeg.style.setProperty("--wneg", (isNeg ? wN : 0).toFixed(2) + "%");
+      els.barNetaPos.style.setProperty("--wpos", (!isNeg ? wN : 0).toFixed(2) + "%");
+
+      els.valNeta.textContent = fmtARS(neta);
+      els.valNeta.classList.toggle("pos", neta >= 0);
+      els.valNeta.classList.toggle("neg", neta < 0);
+
+      els.trackGastos.setAttribute("aria-label", `Gastos del mes: ${fmtARS(tG)} (escala ${fmtARS(scale)})`);
+      els.trackNeta.setAttribute("aria-label", `Rentabilidad neta del mes: ${fmtARS(neta)} (escala ${fmtARS(scale)})`);
+    };
+
+    // Conteo de operaciones por servicio (mes actual)
+    const renderConteo = () => {
+      if (!els.tbodyConteo || !els.cntTotalOps) return;
+
+      const countsOps = Object.fromEntries(SERVICE_OPTIONS.map(s => [s, 0]));
+      for (const r of state.ops) countsOps[r.servicio] = (countsOps[r.servicio] || 0) + 1;
+
+      const totalOps = state.ops.length;
+
+      // KPIs por servicio (operaciones)
+      if (els.cntVAO) els.cntVAO.textContent = String(countsOps["VAO"] || 0);
+      if (els.cntCONVERSION) els.cntCONVERSION.textContent = String(countsOps["CONVERSION"] || 0);
+      if (els.cntSERVICE) els.cntSERVICE.textContent = String(countsOps["SERVICE"] || 0);
+      if (els.cntOTRO) els.cntOTRO.textContent = String(countsOps["OTRO"] || 0);
+
+      const tubosPH = state.ops
+        .filter(r => r.servicio === "PH")
+        .reduce((acc, r) => acc + clampTubos(r.tubos || 1), 0);
+
+      if (els.cntTubosPH) els.cntTubosPH.textContent = String(tubosPH);
+      els.cntTotalOps.textContent = String(totalOps);
+      if (els.tConteo) els.tConteo.textContent = String(totalOps);
+
+      const ordered = SERVICE_OPTIONS
+        .map(s => ({ s, n: countsOps[s] || 0 }))
+        .sort((a, b) => b.n - a.n || a.s.localeCompare(b.s));
+      const top = ordered[0];
+
+      if (els.cntTop) els.cntTop.textContent = top && top.n > 0 ? `${top.s}` : "—";
+      if (els.cntTopHint) {
+        if (!top || top.n <= 0) els.cntTopHint.textContent = "Sin cargas en este mes.";
+        else {
+          const pct = totalOps > 0 ? ((top.n / totalOps) * 100) : 0;
+          els.cntTopHint.textContent = `${top.n} operaciones · ${pct.toFixed(1)}% del total`;
         }
       }
 
-      onSnapshot(colTalleres, snap2 => {
-        const arr = [];
-        snap2.forEach(d => {
-          if(d.id && d.id.startsWith(MANT_PREFIX)) return;
-          const data = d.data();
+      const rows = SERVICE_OPTIONS
+        .map(s => ({ s, n: countsOps[s] || 0 }))
+        .sort((a, b) => b.n - a.n || a.s.localeCompare(b.s));
 
-          let nombre = data.nombre || "";
-          if(d.id === "acosta") nombre = "Rosso - TTE MICROCARGAS - F.FRIAS 924";
-          if(d.id === "silvana-calera") nombre = "Calera Silvana";
-          if(d.id === "calera-torres-gnc") nombre = "Calera Torres";
-          if(d.id === "san-francisco-gnc") nombre = "Sola";
-          if(d.id === "Santa-rosa") nombre = "Maidana - Santa Rosa de Calamuchita";
-          if(d.id === "Oncativo") nombre = "Biondini - Oncativo";
-          if(d.id === "genovesio") nombre = "Genovesio - TTE EL GRINGO - RINCON 1450";
-          if(d.id === "gnc-giordano") nombre = "GNC Giordano - TTE MICROCARGAS - F.FRIAS 924";
+      els.tbodyConteo.innerHTML = rows.map(r => `
+        <tr>
+          <td data-label="Servicio"><strong>${escapeAttr(r.s)}</strong></td>
+          <td data-label="Cantidad" class="num">${r.n}</td>
+        </tr>
+      `).join("");
+    };
 
-          const fleFallback =
-            data.fletero ||
-            (data.asignAgustin ? "Agustin" :
-             data.asignNano ? "Jorge" :
-             data.asignRodrigo ? "Rodrigo" :
-             data.asignJoaquin ? "Joaquin" : "");
+    // renderAll(persistUIOnly=true/false)
+    const renderAll = (persistUIOnly = true) => {
+      renderOps();
+      renderGastos();
+      updateKPIs();
+      renderResultado();
+      renderConteo();
+    };
 
-          arr.push({
-            id: d.id,
-            nombre,
-            vuelta: data.vuelta ?? 1,
-            cantidad: data.cantidad ?? 0,
-            sinValvulaAll: !!data.sinValvulaAll,
-            obs: data.obs || "",
-            fletero: fleFallback || "",
-            estado: data.estado || "retiro"
-          });
-        });
-        talleres = arr;
-        render();
-      });
+    const setTab = (tab) => {
+      state.activeTab = tab;
 
-      if(btnReset) btnReset.addEventListener("click", reiniciarDia);
-      if(ordenCerrarBtn) ordenCerrarBtn.addEventListener("click", cerrarOrden);
-      if(ordenImprimirBtn) ordenImprimirBtn.addEventListener("click", () => window.print());
+      const isOps = tab === "ops";
+      const isG = tab === "gastos";
+      const isR = tab === "resultado";
+      const isC = tab === "conteo";
 
-      if(estadoFiltroFletero){
-        estadoFiltroFletero.addEventListener("change", () => {
-          filtroFletero = estadoFiltroFletero.value;
-          renderEstado();
-        });
+      els.panelOps.classList.toggle("hide", !isOps);
+      els.panelGastos.classList.toggle("hide", !isG);
+      els.panelResultado.classList.toggle("hide", !isR);
+      els.panelConteo.classList.toggle("hide", !isC);
+
+      els.tabOpsBtn.classList.toggle("active", isOps);
+      els.tabGastosBtn.classList.toggle("active", isG);
+      els.tabResultadoBtn.classList.toggle("active", isR);
+      els.tabConteoBtn.classList.toggle("active", isC);
+
+      els.tabOpsBtn.setAttribute("aria-selected", String(isOps));
+      els.tabGastosBtn.setAttribute("aria-selected", String(isG));
+      els.tabResultadoBtn.setAttribute("aria-selected", String(isR));
+      els.tabConteoBtn.setAttribute("aria-selected", String(isC));
+
+      els.footHint.textContent = `Exporta CSV del mes ${state.month} (pestaña actual).`;
+    };
+
+    // -------- RTDB CRUD --------
+    const rtdbAddOp = async (m, op) => {
+      const idRef = push(ref(DB, opsBase(m)));
+      await set(idRef, { ...op, updatedAt: Date.now() });
+    };
+    const rtdbUpdateOp = async (m, id, patch) => {
+      await update(ref(DB, `${opsBase(m)}/${id}`), { ...patch, updatedAt: Date.now() });
+    };
+    const rtdbDeleteOp = async (m, id) => {
+      await remove(ref(DB, `${opsBase(m)}/${id}`));
+    };
+
+    const rtdbAddGasto = async (m, g) => {
+      const idRef = push(ref(DB, gastosBase(m)));
+      await set(idRef, { ...g, updatedAt: Date.now() });
+    };
+    const rtdbUpdateGasto = async (m, id, patch) => {
+      await update(ref(DB, `${gastosBase(m)}/${id}`), { ...patch, updatedAt: Date.now() });
+    };
+    const rtdbDeleteGasto = async (m, id) => {
+      await remove(ref(DB, `${gastosBase(m)}/${id}`));
+    };
+
+    // -------- Eventos UI --------
+
+    const syncTubosField = () => {
+      const isPH = clampText(els.inServicio.value) === "PH";
+      if (els.wrapTubos) els.wrapTubos.style.display = isPH ? "flex" : "none";
+      if (els.inTubos){
+        if (!els.inTubos.value) els.inTubos.value = "1";
+        if (!isPH) els.inTubos.value = "1";
       }
+    };
 
-      if(btnEstadoTodosProceso) btnEstadoTodosProceso.addEventListener("click", () => cambiarEstadoMasivo("proceso"));
-      if(btnEstadoTodosListo) btnEstadoTodosListo.addEventListener("click", () => cambiarEstadoMasivo("listo"));
-      if(btnEstadoTodosEntregado) btnEstadoTodosEntregado.addEventListener("click", () => cambiarEstadoMasivo("entregado"));
+    els.monthPick.addEventListener("change", () => {
+      if (els.dayOps) els.dayOps.value = "";
+      if (els.dayGastos) els.dayGastos.value = "";
+      state.month = clampText(els.monthPick.value) || currentMonth();
+      els.footHint.textContent = `Exporta CSV del mes ${state.month} (pestaña actual).`;
 
-      initBotonesFletero();
-      initCollapsibles();
-      initTabs();
-      initImpresionValvulas();
-      initImpresionMantenimiento();
-    }
+      // fechas por defecto al 1 del mes seleccionado
+      els.inFecha.value = `${state.month}-01`;
+      els.gFecha.value = `${state.month}-01`;
 
-    async function boot(){
-      try{
-        await signInAnonymously(auth);
-      }catch(e){
-        console.error("AUTH ERROR:", e);
-        alert("ERROR AUTH: " + (e?.code || "desconocido") + "\nRevisá: Authentication > Sign-in method (Anonymous habilitado) y Authorized domains.");
+      if (authReady) attachMonthListeners(state.month);
+      // render inmediato (limpia tabla mientras llega snapshot)
+      state.ops = [];
+      state.gastos = [];
+      renderAll(false);
+    });
+
+    // Mostrar/ocultar Tubos (PH)
+    syncTubosField();
+    els.inServicio.addEventListener("change", syncTubosField);
+
+    els.addFormOps.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const fecha = clampText(els.inFecha.value);
+      const servicio = clampText(els.inServicio.value);
+      const dominio = clampText(els.inDominio.value).toUpperCase();
+      const desc = clampText(els.inDesc.value);
+      const venta = toNumber(els.inVenta.value);
+      const costo = toNumber(els.inCosto.value);
+      const tubos = servicio === "PH" ? clampTubos(els.inTubos?.value) : 1;
+
+      if (!fecha || !servicio || venta <= 0){
+        alert("Completa Fecha, Servicio y Venta > 0.");
         return;
       }
-      await inicializarDatos();
+
+      const m = monthOf(fecha) || state.month;
+
+      try{
+        await rtdbAddOp(m, { fecha, servicio, dominio, desc, venta, costo, tubos });
+      } catch(err){
+        console.error(err);
+        alert("Error guardando en Realtime DB. Revisá firebaseConfig y Rules.");
+        return;
+      }
+
+      // si se agregó en otro mes, saltar a ese mes
+      if (m !== state.month){
+        state.month = m;
+        els.monthPick.value = m;
+        els.inFecha.value = `${m}-01`;
+        els.gFecha.value = `${m}-01`;
+        if (authReady) attachMonthListeners(m);
+      }
+
+      els.inDominio.value = "";
+      els.inDesc.value = "";
+      els.inVenta.value = "";
+      els.inCosto.value = "";
+      if (els.inTubos) els.inTubos.value = "1";
+      syncTubosField();
+      els.inDominio.focus();
+    });
+
+    els.addFormGastos.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const fecha = clampText(els.gFecha.value);
+      const categoria = clampText(els.gCategoria.value);
+      const desc = clampText(els.gDesc.value);
+      const monto = toNumber(els.gMonto.value);
+
+      if (!fecha || !categoria || monto <= 0){
+        alert("Completa Fecha, Categoría y Monto > 0.");
+        return;
+      }
+
+      const m = monthOf(fecha) || state.month;
+
+      try{
+        await rtdbAddGasto(m, { fecha, categoria, desc, monto });
+      } catch(err){
+        console.error(err);
+        alert("Error guardando en Realtime DB. Revisá firebaseConfig y Rules.");
+        return;
+      }
+
+      if (m !== state.month){
+        state.month = m;
+        els.monthPick.value = m;
+        els.inFecha.value = `${m}-01`;
+        els.gFecha.value = `${m}-01`;
+        if (authReady) attachMonthListeners(m);
+      }
+
+      els.gDesc.value = "";
+      els.gMonto.value = "";
+      els.gDesc.focus();
+    });
+
+    // Buscar
+    els.btnClearOps.addEventListener("click", () => { els.searchOps.value = ""; renderOps(); });
+    els.searchOps.addEventListener("input", () => renderOps());
+
+    // Filtro por día
+    els.dayOps.addEventListener("change", () => renderOps());
+    els.dayOps.addEventListener("input", () => renderOps());
+    els.btnClearDayOps.addEventListener("click", () => { els.dayOps.value = ""; renderOps(); });
+
+    els.btnClearGastos.addEventListener("click", () => { els.searchGastos.value = ""; renderGastos(); });
+    els.searchGastos.addEventListener("input", () => renderGastos());
+
+    els.dayGastos.addEventListener("change", () => renderGastos());
+    els.dayGastos.addEventListener("input", () => renderGastos());
+    els.btnClearDayGastos.addEventListener("click", () => { els.dayGastos.value = ""; renderGastos(); });
+
+    // Edit/Delete ops (delegation)
+    els.tbodyOps.addEventListener("click", async (e) => {
+      const btn = e.target.closest("button[data-action='delete-op']");
+      if (!btn) return;
+      const tr = btn.closest("tr");
+      const id = tr?.dataset?.id;
+      if (!id) return;
+
+      try{
+        await rtdbDeleteOp(state.month, id);
+      } catch(err){
+        console.error(err);
+        alert("Error eliminando en Realtime DB.");
+      }
+    });
+
+    els.tbodyOps.addEventListener("input", (e) => {
+      handleOpsEditEvent(e);
+    });
+
+    els.tbodyOps.addEventListener("change", (e) => {
+      handleOpsEditEvent(e);
+    });
+
+    function handleOpsEditEvent(e){
+      const el = e.target;
+      const tr = el.closest("tr");
+      if (!tr) return;
+      const id = tr.dataset.id;
+      const field = el.dataset.field;
+      if (!id || !field) return;
+
+      // Si cambia la fecha y pasa a otro mes, este registro debería moverse.
+      // Regla simple: NO mover automáticamente. Si cambiás la fecha a otro mes, queda guardada
+      // pero el registro "desaparece" al no pertenecer al mes actual.
+      // (Si querés mover automático, lo implemento.)
+      let val;
+      if (field === "venta" || field === "costo") val = toNumber(el.value);
+      else if (field === "tubos") val = clampTubos(el.value);
+      else if (field === "dominio") val = clampText(el.value).toUpperCase();
+      else val = clampText(el.value);
+
+      // Si cambia el servicio, habilitar/deshabilitar Tubos según PH
+      if (field === "servicio"){
+        const tubosInput = tr.querySelector("input[data-field='tubos']");
+        const isPH = val === "PH";
+        if (tubosInput){
+          tubosInput.disabled = !isPH;
+          if (isPH){
+            if (!tubosInput.value) tubosInput.value = "1";
+            scheduleUpdateOp(id, "tubos", clampTubos(tubosInput.value));
+          } else {
+            tubosInput.value = "";
+            scheduleUpdateOp(id, "tubos", 1);
+          }
+        }
+      }
+
+      // Debounce por fila/campo (evita update por cada tecla)
+      scheduleUpdateOp(id, field, val);
+      scheduleRender();
     }
 
-    boot();
+
+    // Edit/Delete gastos
+    els.tbodyGastos.addEventListener("click", async (e) => {
+      const btn = e.target.closest("button[data-action='delete-g']");
+      if (!btn) return;
+      const tr = btn.closest("tr");
+      const id = tr?.dataset?.id;
+      if (!id) return;
+
+      try{
+        await rtdbDeleteGasto(state.month, id);
+      } catch(err){
+        console.error(err);
+        alert("Error eliminando en Realtime DB.");
+      }
+    });
+
+    els.tbodyGastos.addEventListener("input", (e) => {
+      handleGastosEditEvent(e);
+    });
+
+    els.tbodyGastos.addEventListener("change", (e) => {
+      handleGastosEditEvent(e);
+    });
+
+    function handleGastosEditEvent(e){
+      const el = e.target;
+      const tr = el.closest("tr");
+      if (!tr) return;
+      const id = tr.dataset.id;
+      const field = el.dataset.field;
+      if (!id || !field) return;
+
+      let val;
+      if (field === "monto") val = toNumber(el.value);
+      else val = clampText(el.value);
+
+      scheduleUpdateGasto(id, field, val);
+      scheduleRender();
+    }
+
+
+    // Tabs
+    els.tabOpsBtn.addEventListener("click", () => setTab("ops"));
+    els.tabGastosBtn.addEventListener("click", () => setTab("gastos"));
+    els.tabResultadoBtn.addEventListener("click", () => setTab("resultado"));
+    els.tabConteoBtn.addEventListener("click", () => setTab("conteo"));
+
+    // Export/Reset (MES)
+    const csvCell = (v) => `"${(v ?? "").toString().replaceAll('"','""')}"`;
+    const download = (content, filename) => {
+      const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+    };
+
+    const exportCSV = () => {
+      const m = state.month;
+
+      if (state.activeTab === "ops"){
+        const rows = state.ops;
+        const header = ["Fecha","Servicio","Dominio","Descripción","Venta","Costo","Rentabilidad"];
+        const lines = [header.join(",")];
+        for (const r of rows){
+          const rent = calcRent(r.venta, r.costo);
+          lines.push([
+            csvCell(r.fecha),
+            csvCell(r.servicio),
+            csvCell(r.dominio),
+            csvCell(r.desc),
+            String(Math.round(toNumber(r.venta))),
+            String(Math.round(toNumber(r.costo))),
+            String(Math.round(rent))
+          ].join(","));
+        }
+        download(lines.join("\n"), `operaciones_${m}.csv`);
+        return;
+      }
+
+      if (state.activeTab === "gastos"){
+        const rows = state.gastos;
+        const header = ["Fecha","Categoría","Descripción","Monto"];
+        const lines = [header.join(",")];
+        for (const g of rows){
+          lines.push([
+            csvCell(g.fecha),
+            csvCell(g.categoria),
+            csvCell(g.desc),
+            String(Math.round(toNumber(g.monto)))
+          ].join(","));
+        }
+        download(lines.join("\n"), `gastos_${m}.csv`);
+        return;
+      }
+
+      if (state.activeTab === "conteo"){
+        const counts = Object.fromEntries(SERVICE_OPTIONS.map(s => [s, 0]));
+        for (const r of state.ops) counts[r.servicio] = (counts[r.servicio] || 0) + 1;
+        const total = state.ops.length;
+
+        const header = ["Mes","Servicio","Cantidad"];
+        const lines = [header.join(",")];
+        for (const s of SERVICE_OPTIONS){
+          lines.push([csvCell(m), csvCell(s), String(counts[s] || 0)].join(","));
+        }
+        lines.push([csvCell(m), csvCell("TOTAL"), String(total)].join(","));
+        download(lines.join("\n"), `conteo_operaciones_${m}.csv`);
+        return;
+      }
+
+      // Resultado
+      const tOps = totalsOps(state.ops);
+      const tG = totalGastos(state.gastos);
+      const neta = tOps.rent - tG;
+      const margenNeto = tOps.venta > 0 ? (neta / tOps.venta) : 0;
+
+      const header = ["Mes","Concepto","Valor"];
+      const lines = [header.join(",")];
+      lines.push([csvCell(m), csvCell("Total Venta"), String(Math.round(tOps.venta))].join(","));
+      lines.push([csvCell(m), csvCell("Total Costo"), String(Math.round(tOps.costo))].join(","));
+      lines.push([csvCell(m), csvCell("Rentabilidad Bruta"), String(Math.round(tOps.rent))].join(","));
+      lines.push([csvCell(m), csvCell("Total Gastos"), String(Math.round(tG))].join(","));
+      lines.push([csvCell(m), csvCell("Rentabilidad Neta"), String(Math.round(neta))].join(","));
+      lines.push([csvCell(m), csvCell("Margen Neto"), csvCell(fmtPct(margenNeto))].join(","));
+      download(lines.join("\n"), `resultado_${m}.csv`);
+    };
+
+    const resetMonthActiveTab = async () => {
+      const m = state.month;
+
+      if (state.activeTab === "ops"){
+        if (!confirm(`Borrar OPERACIONES del mes ${m}?`)) return;
+        try{
+          await remove(ref(DB, opsBase(m)));
+        } catch(err){
+          console.error(err);
+          alert("Error borrando en Realtime DB.");
+        }
+        return;
+      }
+
+      if (state.activeTab === "gastos"){
+        if (!confirm(`Borrar GASTOS del mes ${m}?`)) return;
+        try{
+          await remove(ref(DB, gastosBase(m)));
+        } catch(err){
+          console.error(err);
+          alert("Error borrando en Realtime DB.");
+        }
+        return;
+      }
+
+      alert("Conteo/Resultado se calculan con Operaciones y Gastos. Borra desde esas pestañas.");
+    };
+
+    
+    // -------- Backup / Import --------
+    const BACKUP_ROOT = `rentabilidad/${EMPRESA_ID}`;
+
+    const downloadText = (filename, text, mime="application/json") => {
+      const blob = new Blob([text], { type: mime });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
+    };
+
+    const countBackup = (rootObj) => {
+      const months = rootObj?.months || {};
+      const monthKeys = Object.keys(months);
+      let ops = 0, gastos = 0;
+      for (const mk of monthKeys){
+        const mm = months[mk] || {};
+        ops += Object.keys(mm.ops || {}).length;
+        gastos += Object.keys(mm.gastos || {}).length;
+      }
+      return { monthCount: monthKeys.length, ops, gastos };
+    };
+
+    const backupAll = async () => {
+      try{
+        els.footHint.textContent = "Generando respaldo JSON (todo)...";
+        const snap = await get(ref(DB, BACKUP_ROOT));
+        const data = snap.exists() ? snap.val() : {};
+        const payload = {
+          schema: "rentabilidad_backup_v1",
+          empresaId: EMPRESA_ID,
+          exportedAt: new Date().toISOString(),
+          data
+        };
+        const stamp = new Date();
+        const pad = (n)=>String(n).padStart(2,"0");
+        const name = `backup_${EMPRESA_ID}_${stamp.getFullYear()}-${pad(stamp.getMonth()+1)}-${pad(stamp.getDate())}_${pad(stamp.getHours())}${pad(stamp.getMinutes())}.json`;
+        downloadText(name, JSON.stringify(payload, null, 2));
+        const c = countBackup(data);
+        els.footHint.textContent = `Respaldo listo: ${c.monthCount} meses · ${c.ops} ops · ${c.gastos} gastos.`;
+      } catch(err){
+        console.error(err);
+        alert("Error generando respaldo. Revisá conexión/permisos.");
+        els.footHint.textContent = "Error en respaldo.";
+      }
+    };
+
+    let pendingImportPayload = null;
+
+    const importPickFile = () => {
+      els.fileImport.value = "";
+      els.fileImport.click();
+    };
+
+    const readJSONFile = (file) => new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => {
+        try{ resolve(JSON.parse(String(r.result||""))); }
+        catch(e){ reject(e); }
+      };
+      r.onerror = reject;
+      r.readAsText(file);
+    });
+
+    const handleImportFile = async (file) => {
+      try{
+        const obj = await readJSONFile(file);
+        // Acepta payload con {data} o directamente el root
+        const payload = (obj && obj.data) ? obj : { schema: "unknown", empresaId: EMPRESA_ID, importedAt: new Date().toISOString(), data: obj };
+        pendingImportPayload = payload;
+
+        const c = countBackup(payload.data || {});
+        els.footHint.textContent = `Import listo (pendiente): ${c.monthCount} meses · ${c.ops} ops · ${c.gastos} gastos. Abrí Admin para restaurar.`;
+        // Abrir admin automáticamente para que quede claro que falta clave
+        openAdmin();
+      } catch(err){
+        console.error(err);
+        alert("El archivo no es JSON válido.");
+      }
+    };
+
+    // -------- Admin modal (oculto) --------
+    const admin = {
+      back: document.getElementById("adminBack"),
+      close: document.getElementById("adminClose"),
+      month: document.getElementById("adminMonth"),
+      starKey: document.getElementById("starKey"),
+      importKey: document.getElementById("importKey"),
+      delMonth: document.getElementById("adminDeleteMonth"),
+      restore: document.getElementById("adminRestoreAll"),
+      status: document.getElementById("adminStatus"),
+    };
+
+    const STAR = "********";
+
+    const openAdmin = () => {
+      admin.month.value = state.month || currentMonth();
+      admin.starKey.value = "";
+      admin.importKey.value = "";
+      admin.status.textContent = "";
+      admin.back.style.display = "flex";
+    };
+
+    const closeAdmin = () => {
+      admin.back.style.display = "none";
+    };
+
+    admin.close.addEventListener("click", closeAdmin);
+    admin.back.addEventListener("click", (e)=>{ if(e.target === admin.back) closeAdmin(); });
+
+    // Trigger oculto: 7 clicks en el título en 2.5s
+    let tap = { n:0, t:0 };
+    const titleEl = document.querySelector("h1");
+    if (titleEl){
+      titleEl.style.cursor = "default";
+      titleEl.addEventListener("click", ()=>{
+        const now = Date.now();
+        if (now - tap.t > 2500){ tap = { n:0, t: now }; }
+        tap.n += 1; tap.t = now;
+        if (tap.n >= 7){
+          tap = { n:0, t:0 };
+          openAdmin();
+        }
+      });
+    }
+
+    // Trigger teclado: Ctrl + Shift + K
+    window.addEventListener("keydown", (e)=>{
+      if (e.ctrlKey && e.shiftKey && (e.key === "K" || e.key === "k")){
+        e.preventDefault();
+        openAdmin();
+      }
+    });
+
+    // Botón admin existe pero está oculto
+    if (els.btnAdmin) els.btnAdmin.addEventListener("click", openAdmin);
+
+    // Borrar mes completo (ops + gastos) con clave estrella
+    admin.delMonth.addEventListener("click", async ()=>{
+      const m = admin.month.value || state.month;
+      if (!m) return;
+      if (admin.starKey.value !== STAR){
+        admin.status.textContent = "Clave estrella incorrecta.";
+        return;
+      }
+      if (!confirm(`BORRAR TODO el mes ${m} (OPERACIONES + GASTOS)?`)) return;
+
+      try{
+        admin.status.textContent = "Borrando mes...";
+        await remove(ref(DB, opsBase(m)));
+        await remove(ref(DB, gastosBase(m)));
+        admin.status.textContent = `Mes ${m} borrado.`;
+        // recarga estado en pantalla
+        if (m === state.month) attachMonthListeners(m);
+      } catch(err){
+        console.error(err);
+        admin.status.textContent = "Error borrando mes (ver consola).";
+        alert("Error borrando mes. Revisá permisos/conexión.");
+      }
+    });
+
+    // Restaurar backup: pisa TODO (rentabilidad/EMPRESA_ID)
+    admin.restore.addEventListener("click", async ()=>{
+      if (admin.starKey.value !== STAR){
+        admin.status.textContent = "Clave estrella incorrecta.";
+        return;
+      }
+      if (admin.importKey.value !== "IMPORTAR"){
+        admin.status.textContent = 'Para restaurar escribí IMPORTAR.';
+        return;
+      }
+      if (!pendingImportPayload || !pendingImportPayload.data){
+        admin.status.textContent = "No hay archivo cargado para restaurar.";
+        return;
+      }
+      if (!confirm("Esto SOBRESCRIBE TODA la información. Continuar?")) return;
+
+      try{
+        admin.status.textContent = "Restaurando backup...";
+        await set(ref(DB, BACKUP_ROOT), pendingImportPayload.data);
+        admin.status.textContent = "Backup restaurado.";
+        // refrescar mes actual
+        attachMonthListeners(state.month);
+        els.footHint.textContent = "Backup restaurado.";
+      } catch(err){
+        console.error(err);
+        admin.status.textContent = "Error restaurando (ver consola).";
+        alert("Error restaurando backup. Revisá permisos/conexión.");
+      }
+    });
+
+    // -------- Eventos UI --------
+    els.btnExport.addEventListener("click", exportCSV);
+    els.btnBackup.addEventListener("click", backupAll);
+    els.btnImport.addEventListener("click", importPickFile);
+    els.fileImport.addEventListener("change", (e)=>{
+      const f = e.target.files && e.target.files[0];
+      if (f) handleImportFile(f);
+    });
+// -------- Update debouncers (reduce writes) --------
+    const pendingOp = new Map(); // key -> {t, patch}
+    const pendingG = new Map();
+
+    const scheduleUpdateOp = (id, field, value) => {
+      const key = id;
+      const cur = pendingOp.get(key) || { t: 0, patch: {} };
+      cur.patch[field] = value;
+      clearTimeout(cur.t);
+      cur.t = setTimeout(async () => {
+        const patch = cur.patch;
+        pendingOp.delete(key);
+        try{
+          await rtdbUpdateOp(state.month, id, patch);
+        } catch(err){
+          console.error(err);
+          alert("Error actualizando operación en Realtime DB.");
+        }
+      }, 350);
+      pendingOp.set(key, cur);
+    };
+
+    const scheduleUpdateGasto = (id, field, value) => {
+      const key = id;
+      const cur = pendingG.get(key) || { t: 0, patch: {} };
+      cur.patch[field] = value;
+      clearTimeout(cur.t);
+      cur.t = setTimeout(async () => {
+        const patch = cur.patch;
+        pendingG.delete(key);
+        try{
+          await rtdbUpdateGasto(state.month, id, patch);
+        } catch(err){
+          console.error(err);
+          alert("Error actualizando gasto en Realtime DB.");
+        }
+      }, 350);
+      pendingG.set(key, cur);
+    };
+
+    // INIT
+
+    els.monthPick.value = state.month || currentMonth();
+    els.inFecha.value = `${els.monthPick.value}-01`;
+    els.gFecha.value = `${els.monthPick.value}-01`;
+
+    renderAll(true);
+    setTab(state.activeTab);
+
+    // Auth + listeners
+    (async () => {
+      try{
+        await initAnon();
+        authReady = true;
+        attachMonthListeners(state.month);
+      } catch(err){
+        console.error(err);
+        alert("No se pudo autenticar anónimo. Revisá Auth Anonymous y firebaseConfig.");
+      }
+    })();
+  })();
   </script>
 </body>
-</html>
+
+
+<script>
+// HOTFIX PH MULTIPLE - DEFINITIVO
+(function(){
+  function calcularConteoSeguro(opsMes){
+    const conteo = {OBLEAS:0,SERVICE:0,PH:0,CONVERSION:0,VAO:0,OTRO:0};
+    let tubosPH = 0;
+    opsMes.forEach(o=>{
+      if(!o||!o.servicio) return;
+      if(conteo[o.servicio]!==undefined){
+        conteo[o.servicio]+=1; // PH siempre 1
+      }
+      if(o.servicio==='PH'){
+        tubosPH += Number(o.tubos)||1;
+      }
+    });
+    return {conteo, tubosPH};
+  }
+  window.calcularConteoSeguro = calcularConteoSeguro;
+})();
+</script>
